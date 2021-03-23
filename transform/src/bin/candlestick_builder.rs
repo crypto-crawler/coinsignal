@@ -79,8 +79,16 @@ fn aggregate(nums: &mut Vec<f64>) -> OHLCVMsg {
     }
 }
 
-fn build_candlestick(bar_time: i64, bar_size: i64, trades: &mut [TradeMsg]) -> Candlestick {
+fn build_candlestick(bar_time: i64, bar_size: i64, trades: &mut Vec<TradeMsg>) -> Candlestick {
     assert!(!trades.is_empty());
+    trades.dedup_by(|a, b| {
+        a.timestamp == b.timestamp
+            && a.trade_id == b.trade_id
+            && a.price == b.price
+            && a.quantity == b.quantity
+            && a.volume == b.volume
+            && a.side == b.side
+    });
     trades.sort_by(|x, y| {
         if x.timestamp == y.timestamp {
             x.trade_id.cmp(&y.trade_id)
