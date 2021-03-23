@@ -1,0 +1,7 @@
+[workspace]
+members = [
+  "crypto-crawlers",
+  "ethereum-crawlers",
+  "transform",
+  "utils"
+]
