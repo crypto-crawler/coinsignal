@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use transform::constants::*;
 use utils::pubsub::Publisher;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 #[derive(Serialize, Deserialize)]
 struct Candlestick {
@@ -181,7 +182,8 @@ fn main() {
         );
 
         if prev_bar_time_end == -1 {
-            prev_bar_time_end = trade_msg.timestamp / INTERVAL * INTERVAL;
+            let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as i64;
+            prev_bar_time_end = now / INTERVAL * INTERVAL;
             prev_bar_time_begin = prev_bar_time_end - INTERVAL;
             cur_bar_time_end = prev_bar_time_end + INTERVAL;
         }
@@ -211,7 +213,8 @@ fn main() {
                 publisher.publish::<Candlestick>(REDIS_TOPIC_CANDLESTICK_EXT, &bar);
             }
 
-            prev_bar_time_end = trade_msg.timestamp / INTERVAL * INTERVAL;
+            let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as i64;
+            prev_bar_time_end = now / INTERVAL * INTERVAL;
             prev_bar_time_begin = prev_bar_time_end - INTERVAL;
             cur_bar_time_end = prev_bar_time_end + INTERVAL;
 
