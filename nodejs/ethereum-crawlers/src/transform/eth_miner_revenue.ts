@@ -1,6 +1,6 @@
-import _ from 'lodash';
+import Axios from 'axios';
 import { Publisher, Subscriber } from 'utils';
-import Web3 from 'web3';
+import web3 from 'web3';
 import { BlockHeader } from 'web3-eth';
 import yargs from 'yargs';
 import {
@@ -12,23 +12,55 @@ import {
 interface BlockRewardMsg {
   number: number;
   timestamp: number;
-  revenue: number;
+  miner: string;
+  reward: number;
   // eslint-disable-next-line camelcase
-  revenue_usd: number;
+  reward_usd: number;
 }
 
-const web3 = new Web3(
-  new Web3.providers.WebsocketProvider(process.env.FULL_NODE_URL || 'ws://localhost:8546'),
-);
+// Deprecated due to Infura API limit
+// async function calcBlockReward(blockHash: string): Promise<number> {
+//   const block = await web3.eth.getBlock(blockHash);
+//   const txs = await Promise.all(
+//     block.transactions.map((txHash) => web3.eth.getTransaction(txHash)),
+//   );
+//   const tmp = txs.filter((tx) => tx).map((tx) => web3.utils.fromWei(tx.value, 'ether'));
+//   const blockReward = _.sum(tmp.map((x) => parseFloat(x)));
+//   return blockReward;
+// }
 
-async function calcBlockReward(blockHash: string): Promise<number> {
-  const block = await web3.eth.getBlock(blockHash);
-  const txs = await Promise.all(
-    block.transactions.map((txHash) => web3.eth.getTransaction(txHash)),
-  );
-  const tmp = txs.filter((tx) => tx).map((tx) => web3.utils.fromWei(tx.value, 'ether'));
-  const blockReward = _.sum(tmp.map((x) => parseFloat(x)));
-  return blockReward;
+async function fetchBlockReward(
+  blockNumber: number,
+  ethPrice: number,
+): Promise<BlockRewardMsg | undefined> {
+  for (let i = 0; i < 3; i += 1) {
+    // eslint-disable-next-line no-await-in-loop
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+    // eslint-disable-next-line no-await-in-loop
+    const response = await Axios.get(
+      `https://api.etherscan.io/api?module=block&action=getblockreward&blockno=${blockNumber}&apikey=${process.env.ETHERSCAN_API_KEY}`,
+    );
+    if (response.data.result.blockNumber) {
+      const raw = response.data.result as {
+        blockNumber: string;
+        timeStamp: string;
+        blockMiner: string;
+        blockReward: string;
+      };
+      const ethNum = parseFloat(web3.utils.fromWei(raw.blockReward, 'ether'));
+      const reward: BlockRewardMsg = {
+        number: blockNumber,
+        timestamp: parseInt(raw.timeStamp, 10),
+        miner: raw.blockMiner,
+        reward: parseInt(raw.blockReward, 10),
+        // eslint-disable-next-line camelcase
+        reward_usd: ethPrice * ethNum,
+      };
+      return reward;
+    }
+  }
+  console.warn('Failed to fetch ', blockNumber);
+  return undefined;
 }
 
 const commandModule: yargs.CommandModule = {
@@ -58,16 +90,10 @@ const commandModule: yargs.CommandModule = {
 
     const subscriber = new Subscriber<BlockHeader>(
       async (blockHeader): Promise<void> => {
-        const blockReward = await calcBlockReward(blockHeader.hash);
-
-        const msg: BlockRewardMsg = {
-          number: blockHeader.number,
-          timestamp: blockHeader.timestamp as number,
-          revenue: blockReward,
-          revenue_usd: ethPrice * blockReward,
-        };
-
-        publisher.publish(REDIS_TOPIC_ETH_MINER_REVENUE, msg);
+        const blockReward = await fetchBlockReward(blockHeader.number, ethPrice);
+        if (blockReward) {
+          publisher.publish(REDIS_TOPIC_ETH_MINER_REVENUE, blockReward);
+        }
       },
       REDIS_TOPIC_ETH_BLOCK_HEADER,
       process.env.REDIS_URL || 'redis://localhost:6379',
