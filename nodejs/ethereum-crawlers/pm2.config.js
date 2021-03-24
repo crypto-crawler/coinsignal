@@ -27,6 +27,14 @@ const apps = [
     exec_mode: 'fork',
     instances: 1,
   },
+  {
+    name: 'crawler_cmc_metrics',
+    script: 'dist/crawlers/crawler_cmc_metrics.js',
+    exec_mode: 'fork',
+    instances: 1,
+    cron_restart: '0 * * * *',
+    autorestart: false,
+  },
 ];
 
 module.exports = {
