@@ -1,0 +1,16 @@
+package.json
+package-lock.json
+node_modules/
+dist/
+LICENSE
+yarn.lock
+yarn-error.log
+Dockerfile
+*.sh
+.gitattributes
+.gitignore
+.npmignore
+.prettierignore
+.DS_Store
+.editorconfig
+.eslintignore
