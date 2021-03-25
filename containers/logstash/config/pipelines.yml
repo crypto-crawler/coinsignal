@@ -1,0 +1,16 @@
+# This file is where you define your pipelines. You can define multiple.
+# For more information on multiple pipelines, see the documentation:
+#   https://www.elastic.co/guide/en/logstash/current/multiple-pipelines.html
+
+- pipeline.id: candlestick_ext
+  path.config: "/usr/share/logstash/pipeline/candlestick_ext.conf"
+  pipeline.workers: 1
+- pipeline.id: cmc_global_metrics
+  path.config: "/usr/share/logstash/pipeline/cmc_global_metrics.conf"
+  pipeline.workers: 1
+- pipeline.id: eth_block_header
+  path.config: "/usr/share/logstash/pipeline/eth_block_header.conf"
+  pipeline.workers: 1
+- pipeline.id: eth_gas_price
+  path.config: "/usr/share/logstash/pipeline/eth_gas_price.conf"
+  pipeline.workers: 1

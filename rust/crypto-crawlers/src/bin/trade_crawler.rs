@@ -49,7 +49,11 @@ fn main() {
         );
         "redis://localhost:6379"
     } else {
-        Box::leak(std::env::var("REDIS_URL").unwrap().into_boxed_str())
+        let mut url = std::env::var("REDIS_URL").unwrap();
+        if !url.starts_with("redis://") {
+            url = format!("redis://{}", url);
+        }
+        Box::leak(url.into_boxed_str())
     };
 
     crawl(exchange, market_type, redis_url);

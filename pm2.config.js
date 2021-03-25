@@ -48,7 +48,7 @@ Object.keys(market_types).forEach((exchange) => {
       script: "trade_crawler",
       args: `${exchange} ${market_ype}`,
       exec_interpreter: "none",
-      exec_mode: "fork_mode",
+      exec_mode: "fork",
       instances: 1,
       restart_delay: 5000, // 5 seconds
     };
@@ -61,9 +61,45 @@ apps.push({
   name: "candlestick_builder",
   script: "candlestick_builder",
   exec_interpreter: "none",
-  exec_mode: "fork_mode",
+  exec_mode: "fork",
   instances: 1,
   restart_delay: 5000, // 5 seconds
+});
+
+apps.push({
+  name: "crawler_eth_price",
+  script: "crawler_eth_price",
+  exec_interpreter: "none",
+  exec_mode: "fork",
+  instances: 1,
+  restart_delay: 5000, // 5 seconds
+});
+
+apps.push({
+  name: "crawler_gas_price",
+  script: "crawler_gas_price",
+  exec_interpreter: "none",
+  exec_mode: "fork",
+  instances: 1,
+  restart_delay: 5000, // 5 seconds
+});
+
+apps.push({
+  name: "crawler_block_header",
+  script: "crawler_block_header",
+  exec_interpreter: "none",
+  exec_mode: "fork",
+  instances: 1,
+  restart_delay: 5000, // 5 seconds
+});
+
+apps.push({
+  name: "cmc_global_metrics",
+  script: "cmc_global_metrics",
+  exec_interpreter: "none",
+  exec_mode: "fork",
+  cron_restart: "*/5 * * * *",
+  autorestart: false,
 });
 
 module.exports = {

@@ -1,0 +1,67 @@
+version: "3.9"
+
+services:
+  redis:
+    image: redis:latest
+    ports:
+      - 6379:6379
+    restart: always
+
+  influxdb:
+    image: influxdb:1.8
+    ports:
+      - 8086:8086
+    environment:
+      - INFLUXDB_DB=coinsignal
+      - INFLUXDB_ADMIN_USER=admin
+      - INFLUXDB_ADMIN_PASSWORD=passw0rd
+      - INFLUXDB_HTTP_AUTH_ENABLED=true
+      - INFLUXDB_HTTP_FLUX_ENABLED=true
+      - INFLUXDB_LOGGING_LEVEL=warn
+      - INFLUXDB_HTTP_LOG_ENABLED=false
+    volumes:
+      - "influxdb_data:/var/lib/influxdb"
+    restart: always
+
+  logstash:
+    build:
+      context: ./containers/logstash
+    image: logstash:latest
+    depends_on:
+      - redis
+      - influxdb
+    restart: always
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - 3000:3000
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=passw0rd
+    volumes:
+      - "grafana_data:/var/lib/grafana"
+      - "./configs/grafana/provisioning:/etc/grafana/provisioning:ro"
+    depends_on:
+      - influxdb
+    restart: always
+
+  crawlers:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    image: coinsignal:latest
+    environment:
+      - REDIS_URL=redis:6379
+      - FULL_NODE_URL=wss://mainnet.infura.io/ws/v3/6866aa0c8c3d48638fedf2d83c85f4b8
+      - CMC_API_KEY=1fb6c6ba-e6de-430b-81ec-ac8909b03a07
+      - ETHERSCAN_API_KEY=HHS8I3EHGDS8NIUJERJ9CW5E3BEC8K34E9
+    depends_on:
+      - redis
+    restart: always
+
+volumes:
+  influxdb_data:
+    driver: local
+  grafana_data:
+    driver: local

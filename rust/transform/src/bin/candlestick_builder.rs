@@ -2,7 +2,7 @@ use crypto_market_type::MarketType;
 use crypto_msg_parser::{TradeMsg, TradeSide};
 use log::*;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::{collections::HashMap, time::Instant};
 use std::time::{SystemTime, UNIX_EPOCH};
 use transform::constants::*;
 use utils::pubsub::Publisher;
@@ -157,12 +157,16 @@ fn main() {
     env_logger::init();
 
     let redis_url: &'static str = if std::env::var("REDIS_URL").is_err() {
-        warn!(
+        info!(
             "The REDIS_URL environment variable is empty, using redis://localhost:6379 by default"
         );
         "redis://localhost:6379"
     } else {
-        Box::leak(std::env::var("REDIS_URL").unwrap().into_boxed_str())
+        let mut url = std::env::var("REDIS_URL").unwrap();
+        if !url.starts_with("redis://") {
+            url = format!("redis://{}", url);
+        }
+        Box::leak(url.into_boxed_str())
     };
     let mut publisher = Publisher::new(redis_url);
 
@@ -179,6 +183,7 @@ fn main() {
     let mut pubsub = connection.as_pubsub();
     pubsub.subscribe(REDIS_TOPIC_TRADE).unwrap();
 
+    let start_time = Instant::now();
     loop {
         let msg = pubsub.get_message().unwrap();
         let payload: String = msg.get_payload().unwrap();
@@ -200,11 +205,14 @@ fn main() {
         }
 
         if trade_msg.timestamp < prev_bar_time_begin {
-            warn!(
-                "Expired msg, prev_bar_time_begin: {}, trade_msg: {}",
-                prev_bar_time_begin,
-                serde_json::to_string(&trade_msg).unwrap()
-            );
+            // Don't log old messages at the beginning 5 minutes
+            if start_time.elapsed().as_secs() > 300 {
+                warn!(
+                    "Expired msg, prev_bar_time_begin: {}, trade_msg: {}",
+                    prev_bar_time_begin,
+                    serde_json::to_string(&trade_msg).unwrap()
+                );
+            }
         } else if trade_msg.timestamp < prev_bar_time_end {
             if !cache_prev.contains_key(&key) {
                 cache_prev.insert(key.clone(), Vec::new());
@@ -224,13 +232,9 @@ fn main() {
                 publisher.publish::<Candlestick>(REDIS_TOPIC_CANDLESTICK_EXT, &bar);
             }
 
-            let now = SystemTime::now()
-                .duration_since(UNIX_EPOCH)
-                .unwrap()
-                .as_millis() as i64;
-            prev_bar_time_end = now / INTERVAL * INTERVAL;
-            prev_bar_time_begin = prev_bar_time_end - INTERVAL;
-            cur_bar_time_end = prev_bar_time_end + INTERVAL;
+            prev_bar_time_begin =   prev_bar_time_end;
+            prev_bar_time_end = cur_bar_time_end;
+            cur_bar_time_end = cur_bar_time_end + INTERVAL;
 
             cache_prev = cache;
             cache = HashMap::new();

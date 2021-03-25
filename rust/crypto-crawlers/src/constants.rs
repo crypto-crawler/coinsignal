@@ -1,3 +1,3 @@
-pub const REDIS_TOPIC_PREFIX: &str = "crypto-crawlers:";
-pub const REDIS_TOPIC_TRADE: &str = "crypto-crawlers:trade";
-pub const REDIS_TOPIC_TICKER: &str = "crypto-crawlers:ticker";
+pub const REDIS_TOPIC_PREFIX: &str = "coinsignal:";
+pub const REDIS_TOPIC_TRADE: &str = "coinsignal:trade";
+pub const REDIS_TOPIC_TICKER: &str = "coinsignal:ticker";
