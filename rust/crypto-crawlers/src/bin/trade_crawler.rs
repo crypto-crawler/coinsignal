@@ -1,13 +1,22 @@
 use crypto_crawler::*;
 use crypto_crawlers::constants::REDIS_TOPIC_TRADE;
 use crypto_msg_parser::{parse_trade, TradeMsg};
+use lazy_static::lazy_static;
 use log::*;
 use std::{
+    collections::HashSet,
     env,
     str::FromStr,
     sync::{Arc, Mutex},
 };
 use utils::pubsub::Publisher;
+
+lazy_static! {
+    // see https://www.stablecoinswar.com/
+    static ref STABLE_COINS: HashSet<&'static str> = vec![
+        "USDT", "USDC", "BUSD", "DAI", "PAX", "HUSD", "TUSD", "GUSD"
+        ].into_iter().collect();
+}
 
 pub fn crawl(exchange: &'static str, market_type: MarketType, redis_url: &'static str) {
     let publisher = Arc::new(Mutex::new(Publisher::new(redis_url)));
@@ -15,10 +24,15 @@ pub fn crawl(exchange: &'static str, market_type: MarketType, redis_url: &'stati
     let on_msg_ext = Arc::new(Mutex::new(move |msg: Message| {
         let trades = parse_trade(&msg.exchange, msg.market_type, &msg.json).unwrap();
         for trade in trades.iter() {
-            publisher
-                .lock()
-                .unwrap()
-                .publish::<TradeMsg>(REDIS_TOPIC_TRADE, trade);
+            let slash_pos = trade.pair.find("/").unwrap();
+            let quote = &trade.pair[slash_pos + 1..];
+
+            if STABLE_COINS.contains(quote) {
+                publisher
+                    .lock()
+                    .unwrap()
+                    .publish::<TradeMsg>(REDIS_TOPIC_TRADE, trade);
+            }
         }
     }));
 
