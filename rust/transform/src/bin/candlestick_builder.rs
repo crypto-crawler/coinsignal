@@ -2,8 +2,8 @@ use crypto_market_type::MarketType;
 use crypto_msg_parser::{TradeMsg, TradeSide};
 use log::*;
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, time::Instant};
 use std::time::{SystemTime, UNIX_EPOCH};
+use std::{collections::HashMap, time::Instant};
 use transform::constants::*;
 use utils::pubsub::Publisher;
 
@@ -24,10 +24,11 @@ struct Candlestick {
     mean: f64,
     median: f64,
 
-    volume: f64,            // base volume
+    volume: f64,      // base volume
+    volume_sell: f64, // base volume at sell side
+    volume_buy: f64,  // base volume at buy side
+
     volume_quote: f64,      // quote volume
-    volume_sell: f64,       // base volume at sell side
-    volume_buy: f64,        // base volume at buy side
     volume_quote_sell: f64, // quote volume at sell side
     volume_quote_buy: f64,  // quote volume at buy side
 
@@ -232,7 +233,7 @@ fn main() {
                 publisher.publish::<Candlestick>(REDIS_TOPIC_CANDLESTICK_EXT, &bar);
             }
 
-            prev_bar_time_begin =   prev_bar_time_end;
+            prev_bar_time_begin = prev_bar_time_end;
             prev_bar_time_end = cur_bar_time_end;
             cur_bar_time_end = cur_bar_time_end + INTERVAL;
 
