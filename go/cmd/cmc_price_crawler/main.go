@@ -158,12 +158,12 @@ func main() {
 		}
 		price, _ := strconv.ParseFloat(string(priceStr), 64)
 
-		mark_price := &pojo.MarkPrice{
+		currency_price := &pojo.CurrencyPrice{
 			Currency: currency,
 			Price:    price,
 		}
-		json_bytes, _ = json.Marshal(mark_price)
-		publisher.Publish(config.REDIS_TOPIC_MARK_PRICE, string(json_bytes))
+		json_bytes, _ = json.Marshal(currency_price)
+		publisher.Publish(config.REDIS_TOPIC_CURRENCY_PRICE_CHANNEL, string(json_bytes))
 	}
 
 	// publisher.Close()

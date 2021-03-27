@@ -821,7 +821,7 @@
           "measurement": "candlestick_ext",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT sum(\"volume_quote_buy\") - sum(\"volume_quote_sell\") FROM \"candlestick_ext\" WHERE (\"bar_size\" = '60000') AND $timeFilter GROUP BY time(5m) fill(0)",
+          "query": "SELECT sum(\"volume_usd_buy\") - sum(\"volume_usd_sell\") FROM \"candlestick_ext\" WHERE (\"bar_size\" = '60000') AND $timeFilter GROUP BY time(5m) fill(0)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -829,7 +829,7 @@
             [
               {
                 "params": [
-                  "volume_quote_buy"
+                  "volume_usd_buy"
                 ],
                 "type": "field"
               },
@@ -841,7 +841,7 @@
             [
               {
                 "params": [
-                  "volume_quote_sell"
+                  "volume_usd_sell"
                 ],
                 "type": "field"
               },
@@ -965,7 +965,7 @@
           "measurement": "candlestick_ext",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT (sum(\"volume_quote_buy\")-sum(\"volume_quote_sell\"))/sum(\"volume_quote\") FROM \"candlestick_ext\" WHERE (\"bar_size\" = '60000') AND $timeFilter GROUP BY time(5m) fill(0)",
+          "query": "SELECT (sum(\"volume_usd_buy\")-sum(\"volume_usd_sell\"))/sum(\"volume_usd\") FROM \"candlestick_ext\" WHERE (\"bar_size\" = '60000') AND $timeFilter GROUP BY time(5m) fill(0)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1096,7 +1096,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT (sum(\"volume_quote_buy\")-sum(\"volume_quote_sell\"))/sum(\"volume_quote\") FROM \"candlestick_ext\" WHERE (\"bar_size\" = '60000') AND $timeFilter GROUP BY time(5m), \"pair\" fill(0)",
+          "query": "SELECT (sum(\"volume_usd_buy\")-sum(\"volume_usd_sell\"))/sum(\"volume_usd\") FROM \"candlestick_ext\" WHERE (\"bar_size\" = '60000') AND $timeFilter GROUP BY time(5m), \"pair\" fill(0)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",

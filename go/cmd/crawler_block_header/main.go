@@ -60,7 +60,7 @@ func main() {
 		log.Fatal("The REDIS_URL environment variable is empty")
 	}
 
-	priceUpdater := utils.NewPriceUpdater(ctx, redis_url)
+	priceCache := utils.NewPriceCache(ctx, redis_url)
 
 	client, err := ethclient.Dial(full_node_url)
 	if err != nil {
@@ -85,7 +85,7 @@ func main() {
 			blockNumber, _ := strconv.ParseInt(string(blockNumberBytes), 0, 64)
 			blockReward := fetchBlockReward(blockNumber)
 
-			ethPrice := priceUpdater.GetPrice("ETH")
+			ethPrice := priceCache.GetPrice("ETH")
 
 			blockRewardUSD := blockReward * ethPrice
 
@@ -111,5 +111,5 @@ func main() {
 	}
 
 	// publisher.Close()
-	// priceUpdater.Close()
+	// priceCache.Close()
 }

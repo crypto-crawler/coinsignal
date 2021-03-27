@@ -52,7 +52,7 @@ func main() {
 		log.Fatal("The REDIS_URL environment variable is empty")
 	}
 
-	priceUpdater := utils.NewPriceUpdater(ctx, redis_url)
+	priceCache := utils.NewPriceCache(ctx, redis_url)
 	publisher := pubsub.NewPublisher(ctx, redis_url)
 
 	// see https://taichi.network/#gasnow
@@ -65,7 +65,7 @@ func main() {
 		ws_msg := WebsocketMsg{}
 		json.Unmarshal(message, &ws_msg)
 
-		ethPrice := priceUpdater.GetPrice("ETH")
+		ethPrice := priceCache.GetPrice("ETH")
 
 		gas_price := &GasPrice{
 			Rapid:     fromWei(ws_msg.Data.GasPrices.Rapid, ethPrice),
@@ -82,5 +82,5 @@ func main() {
 	}
 
 	// publisher.Close()
-	// priceUpdater.Close()
+	// priceCache.Close()
 }

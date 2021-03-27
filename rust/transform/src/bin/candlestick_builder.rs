@@ -9,12 +9,12 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 use transform::constants::*;
-use utils::{price_updater::PriceUpdater, pubsub::Publisher};
+use utils::{pubsub::Publisher, PriceCache};
 
 lazy_static! {
     // see https://www.stablecoinswar.com/
     static ref STABLE_COINS: HashSet<&'static str> = vec![
-        "USDT", "USDC", "BUSD", "DAI", "PAX", "HUSD", "TUSD", "GUSD", "USDK"
+        "USD", "USDT", "USDC", "BUSD", "DAI", "PAX", "HUSD", "TUSD", "GUSD", "USDK"
         ].into_iter().collect();
 
     static ref REDIS_URL: &'static str = if std::env::var("REDIS_URL").is_err() {
@@ -30,7 +30,7 @@ lazy_static! {
             Box::leak(url.into_boxed_str())
         };
 
-    static ref PRICE_UPDATER: PriceUpdater = PriceUpdater::new(*REDIS_URL);
+    static ref PRICE_CACHE: PriceCache = PriceCache::new(*REDIS_URL);
 }
 
 #[derive(Serialize, Deserialize)]
@@ -114,7 +114,7 @@ fn calc_volume_usd(trade: &TradeMsg) -> f64 {
     let quote = extract_quote(&trade.pair);
     if STABLE_COINS.contains(quote) {
         trade.price * trade.quantity
-    } else if let Some(quote_price) = PRICE_UPDATER.get_price(quote) {
+    } else if let Some(quote_price) = PRICE_CACHE.get_price(quote) {
         trade.price * trade.quantity * quote_price
     } else {
         panic!("Unknown quote currency {}", quote);
@@ -128,10 +128,6 @@ fn build_candlestick(
 ) -> Option<Candlestick> {
     assert!(!trades.is_empty());
     if trades.is_empty() || !is_good(extract_quote(&trades[0].pair)) {
-        return None;
-    }
-    let quote = extract_quote(&trades[0].pair);
-    if !is_good(quote) {
         return None;
     }
 
@@ -229,7 +225,7 @@ fn extract_quote(pair: &str) -> &str {
 }
 
 fn is_good(quote: &str) -> bool {
-    STABLE_COINS.contains(quote) || PRICE_UPDATER.get_price(quote).is_some()
+    STABLE_COINS.contains(quote) || PRICE_CACHE.get_price(quote).is_some()
 }
 
 // Merge trades into 1-minute klines
@@ -258,10 +254,10 @@ fn main() {
         let trade_msg = serde_json::from_str::<TradeMsg>(&payload).unwrap();
 
         if !is_good(extract_quote(&trade_msg.pair)) {
-            warn!(
-                "{}, {}, {}",
-                trade_msg.exchange, trade_msg.market_type, trade_msg.pair
-            );
+            // warn!(
+            //     "{}, {}, {}",
+            //     trade_msg.exchange, trade_msg.market_type, trade_msg.pair
+            // );
             continue;
         }
 
