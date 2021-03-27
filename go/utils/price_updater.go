@@ -32,25 +32,23 @@ func NewPriceUpdater(ctx context.Context, redis_url string) *PriceUpdater {
 }
 
 func (updater *PriceUpdater) GetPrice(currency string) float64 {
-	price, _ := updater.prices[currency]
+	price := updater.prices[currency]
 	return price
 }
 
 func (updater *PriceUpdater) Close() {
- updater.pubsub.Close()
+	updater.pubsub.Close()
 }
 
 func (updater *PriceUpdater) run() {
 	ch := updater.pubsub.Channel()
 	// Consume messages.
 	for msg := range ch {
-		var mark_prices []pojo.MarkPrice
-		if err := json.Unmarshal([]byte(msg.Payload), &mark_prices); err != nil {
+		var mark_price pojo.MarkPrice
+		if err := json.Unmarshal([]byte(msg.Payload), &mark_price); err != nil {
 			log.Fatalln(err)
 		} else {
-			for _, x := range mark_prices {
-				updater.prices[x.Currency] = x.Price
-			}
+			updater.prices[mark_price.Currency] = mark_price.Price
 		}
 	}
 }

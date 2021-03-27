@@ -39,19 +39,18 @@ func main() {
 			panic(err)
 		}
 
-		var mark_prices []pojo.MarkPrice
 		for _, mark_price_raw := range mark_prices_raw {
 			currency := mark_price_raw.Symbol[:len(mark_price_raw.Symbol)-4]
 			price, _ := strconv.ParseFloat(mark_price_raw.Price, 64)
+
 			mark_price := pojo.MarkPrice{
 				Currency: currency,
 				Price:    price,
 			}
-			mark_prices = append(mark_prices, mark_price)
-		}
 
-		json_bytes, _ := json.Marshal(mark_prices)
-		publisher.Publish(config.REDIS_TOPIC_MARK_PRICE, string(json_bytes))
+			json_bytes, _ := json.Marshal(mark_price)
+			publisher.Publish(config.REDIS_TOPIC_MARK_PRICE, string(json_bytes))
+		}
 	}
 	// publisher.Close()
 }

@@ -9,13 +9,28 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 use transform::constants::*;
-use utils::pubsub::Publisher;
+use utils::{price_updater::PriceUpdater, pubsub::Publisher};
 
 lazy_static! {
     // see https://www.stablecoinswar.com/
     static ref STABLE_COINS: HashSet<&'static str> = vec![
-        "USDT", "USDC", "BUSD", "DAI", "PAX", "HUSD", "TUSD", "GUSD"
+        "USDT", "USDC", "BUSD", "DAI", "PAX", "HUSD", "TUSD", "GUSD", "USDK"
         ].into_iter().collect();
+
+    static ref REDIS_URL: &'static str = if std::env::var("REDIS_URL").is_err() {
+            info!(
+                "The REDIS_URL environment variable is empty, using redis://localhost:6379 by default"
+            );
+            "redis://localhost:6379"
+        } else {
+            let mut url = std::env::var("REDIS_URL").unwrap();
+            if !url.starts_with("redis://") {
+                url = format!("redis://{}", url);
+            }
+            Box::leak(url.into_boxed_str())
+        };
+
+    static ref PRICE_UPDATER: PriceUpdater = PriceUpdater::new(*REDIS_URL);
 }
 
 #[derive(Serialize, Deserialize)]
@@ -42,6 +57,10 @@ struct Candlestick {
     volume_quote: f64,      // quote volume
     volume_quote_sell: f64, // quote volume at sell side
     volume_quote_buy: f64,  // quote volume at buy side
+
+    volume_usd: f64,      // quote volume
+    volume_usd_sell: f64, // quote volume at sell side
+    volume_usd_buy: f64,  // quote volume at buy side
 
     vwap: f64, // volume weighted average price
 
@@ -91,8 +110,31 @@ fn aggregate(nums: &mut Vec<f64>) -> OHLCVMsg {
     }
 }
 
-fn build_candlestick(bar_time: i64, bar_size: i64, trades: &mut Vec<TradeMsg>) -> Candlestick {
+fn calc_volume_usd(trade: &TradeMsg) -> f64 {
+    let quote = extract_quote(&trade.pair);
+    if STABLE_COINS.contains(quote) {
+        trade.price * trade.quantity
+    } else if let Some(quote_price) = PRICE_UPDATER.get_price(quote) {
+        trade.price * trade.quantity * quote_price
+    } else {
+        panic!("Unknown quote currency {}", quote);
+    }
+}
+
+fn build_candlestick(
+    bar_time: i64,
+    bar_size: i64,
+    trades: &mut Vec<TradeMsg>,
+) -> Option<Candlestick> {
     assert!(!trades.is_empty());
+    if trades.is_empty() || !is_good(extract_quote(&trades[0].pair)) {
+        return None;
+    }
+    let quote = extract_quote(&trades[0].pair);
+    if !is_good(quote) {
+        return None;
+    }
+
     trades.dedup_by(|a, b| {
         a.timestamp == b.timestamp
             && a.trade_id == b.trade_id
@@ -123,19 +165,31 @@ fn build_candlestick(bar_time: i64, bar_size: i64, trades: &mut Vec<TradeMsg>) -
         .filter(|x| x.side == TradeSide::Buy)
         .map(|x| x.quantity)
         .sum();
-    let volume_quote = trades.iter().map(|x| x.volume).sum();
+    let volume_quote = trades.iter().map(|x| x.volume * x.price).sum();
     let volume_quote_sell = trades
         .iter()
         .filter(|x| x.side == TradeSide::Sell)
-        .map(|x| x.volume)
+        .map(|x| x.volume * x.price)
         .sum();
     let volume_quote_buy = trades
         .iter()
         .filter(|x| x.side == TradeSide::Buy)
-        .map(|x| x.volume)
+        .map(|x| x.volume * x.price)
         .sum();
 
-    Candlestick {
+    let volume_usd = trades.iter().map(|x| calc_volume_usd(x)).sum();
+    let volume_usd_sell = trades
+        .iter()
+        .filter(|x| x.side == TradeSide::Sell)
+        .map(|x| calc_volume_usd(x))
+        .sum();
+    let volume_usd_buy = trades
+        .iter()
+        .filter(|x| x.side == TradeSide::Buy)
+        .map(|x| calc_volume_usd(x))
+        .sum();
+
+    let candlestick = Candlestick {
         exchange: trades[0].exchange.clone(),
         market_type: trades[0].market_type,
         symbol: trades[0].symbol.clone(),
@@ -155,32 +209,34 @@ fn build_candlestick(bar_time: i64, bar_size: i64, trades: &mut Vec<TradeMsg>) -
         volume_quote,
         volume_quote_sell,
         volume_quote_buy,
+        volume_usd,
+        volume_usd_sell,
+        volume_usd_buy,
 
         vwap: volume_quote / volume,
 
         count: trades.len() as i64,
         count_sell: trades.iter().filter(|x| x.side == TradeSide::Sell).count() as i64,
         count_buy: trades.iter().filter(|x| x.side == TradeSide::Buy).count() as i64,
-    }
+    };
+
+    Some(candlestick)
+}
+
+fn extract_quote(pair: &str) -> &str {
+    let slash_pos = pair.find("/").unwrap();
+    &pair[slash_pos + 1..]
+}
+
+fn is_good(quote: &str) -> bool {
+    STABLE_COINS.contains(quote) || PRICE_UPDATER.get_price(quote).is_some()
 }
 
 // Merge trades into 1-minute klines
 fn main() {
     env_logger::init();
 
-    let redis_url: &'static str = if std::env::var("REDIS_URL").is_err() {
-        info!(
-            "The REDIS_URL environment variable is empty, using redis://localhost:6379 by default"
-        );
-        "redis://localhost:6379"
-    } else {
-        let mut url = std::env::var("REDIS_URL").unwrap();
-        if !url.starts_with("redis://") {
-            url = format!("redis://{}", url);
-        }
-        Box::leak(url.into_boxed_str())
-    };
-    let mut publisher = Publisher::new(redis_url);
+    let mut publisher = Publisher::new(*REDIS_URL);
 
     let mut prev_bar_time_end = -1i64;
     let mut prev_bar_time_begin = -1i64;
@@ -190,7 +246,7 @@ fn main() {
     let mut cache = HashMap::<String, Vec<TradeMsg>>::new();
 
     // subscriber
-    let client = redis::Client::open(redis_url).unwrap();
+    let client = redis::Client::open(*REDIS_URL).unwrap();
     let mut connection = client.get_connection().unwrap();
     let mut pubsub = connection.as_pubsub();
     pubsub.subscribe(REDIS_TOPIC_TRADE).unwrap();
@@ -201,10 +257,11 @@ fn main() {
         let payload: String = msg.get_payload().unwrap();
         let trade_msg = serde_json::from_str::<TradeMsg>(&payload).unwrap();
 
-        let v: Vec<&str> = trade_msg.pair.split('_').collect();
-        // let base = v[0];
-        let quote = v[1];
-        if !STABLE_COINS.contains(quote) {
+        if !is_good(extract_quote(&trade_msg.pair)) {
+            warn!(
+                "{}, {}, {}",
+                trade_msg.exchange, trade_msg.market_type, trade_msg.pair
+            );
             continue;
         }
 
@@ -247,8 +304,9 @@ fn main() {
             let keys: Vec<String> = cache_prev.keys().cloned().collect();
             for key in keys.iter() {
                 let trades = cache_prev.get_mut(key).unwrap();
-                let bar = build_candlestick(prev_bar_time_end, INTERVAL, trades);
-                publisher.publish::<Candlestick>(REDIS_TOPIC_CANDLESTICK_EXT, &bar);
+                if let Some(bar) = build_candlestick(prev_bar_time_end, INTERVAL, trades) {
+                    publisher.publish::<Candlestick>(REDIS_TOPIC_CANDLESTICK_EXT, &bar);
+                }
             }
 
             prev_bar_time_begin = prev_bar_time_end;
