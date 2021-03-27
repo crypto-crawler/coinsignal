@@ -14,8 +14,8 @@ import (
 	"github.com/buger/jsonparser"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/go-redis/redis/v8"
 	"github.com/soulmachine/coinsignal/config"
+	"github.com/soulmachine/coinsignal/pojo"
 	"github.com/soulmachine/coinsignal/pubsub"
 )
 
@@ -47,6 +47,20 @@ func fetchBlockReward(blockNumber int64) float64 {
 	return 4.54104 // default value, see https://bitinfocharts.com/ethereum/
 }
 
+var ethPrice = 0.0
+
+func onMsg(msg string) {
+	var mark_prices []pojo.MarkPrice
+	if err := json.Unmarshal([]byte(msg), &mark_prices); err != nil {
+		panic(err)
+	}
+	for _, x := range mark_prices {
+		if x.Currency == "ETH" {
+			ethPrice = x.Price
+		}
+	}
+}
+
 func main() {
 	ctx := context.Background()
 
@@ -59,9 +73,9 @@ func main() {
 	if len(redis_url) == 0 {
 		log.Fatal("The REDIS_URL environment variable is empty")
 	}
-	rdb := redis.NewClient(&redis.Options{
-		Addr: redis_url,
-	})
+
+	subscriber := pubsub.NewSubscriber(ctx, redis_url, config.REDIS_TOPIC_MARK_PRICE, onMsg)
+	go subscriber.Run()
 
 	client, err := ethclient.Dial(full_node_url)
 	if err != nil {
@@ -86,11 +100,6 @@ func main() {
 			blockNumber, _ := strconv.ParseInt(string(blockNumberBytes), 0, 64)
 			blockReward := fetchBlockReward(blockNumber)
 
-			ethPriceBytes, err := rdb.Get(ctx, config.REDIS_TOPIC_ETH_PRICE).Result()
-			if err != nil {
-				log.Fatal(err)
-			}
-			ethPrice, _ := strconv.ParseFloat(ethPriceBytes, 64)
 			blockRewardUSD := blockReward * ethPrice
 
 			json_bytes, _ = jsonparser.Set(json_bytes, []byte(strconv.FormatFloat(blockReward, 'f', -1, 64)), "reward")
@@ -108,7 +117,9 @@ func main() {
 			json_bytes, _ = jsonparser.Set(json_bytes, []byte(strconv.FormatInt(gasUsed, 10)), "gasUsed")
 			json_bytes, _ = jsonparser.Set(json_bytes, []byte(strconv.FormatInt(timestamp, 10)), "timestamp")
 
-			publisher.Publish(config.REDIS_TOPIC_ETH_BLOCK_HEADER, string(json_bytes))
+			if ethPrice > 0.0 {
+				publisher.Publish(config.REDIS_TOPIC_ETH_BLOCK_HEADER, string(json_bytes))
+			}
 		}
 	}
 }

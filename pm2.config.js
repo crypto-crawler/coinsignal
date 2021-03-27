@@ -67,8 +67,8 @@ apps.push({
 });
 
 apps.push({
-  name: "crawler_eth_price",
-  script: "crawler_eth_price",
+  name: "crawler_mark_price",
+  script: "crawler_mark_price",
   exec_interpreter: "none",
   exec_mode: "fork",
   instances: 1,

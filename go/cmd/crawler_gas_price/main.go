@@ -5,11 +5,10 @@ import (
 	"encoding/json"
 	"log"
 	"os"
-	"strconv"
 
-	"github.com/go-redis/redis/v8"
 	"github.com/gorilla/websocket"
 	"github.com/soulmachine/coinsignal/config"
+	"github.com/soulmachine/coinsignal/pojo"
 	"github.com/soulmachine/coinsignal/pubsub"
 )
 
@@ -45,6 +44,20 @@ func fromWei(wei uint64, eth_price float64) float64 {
 	return float64(wei) / 1000000000000000000 * 21000 * eth_price
 }
 
+var ethPrice = 0.0
+
+func onMsg(msg string) {
+	var mark_prices []pojo.MarkPrice
+	if err := json.Unmarshal([]byte(msg), &mark_prices); err != nil {
+		panic(err)
+	}
+	for _, x := range mark_prices {
+		if x.Currency == "ETH" {
+			ethPrice = x.Price
+		}
+	}
+}
+
 func main() {
 	ctx := context.Background()
 
@@ -53,10 +66,10 @@ func main() {
 		log.Fatal("The REDIS_URL environment variable is empty")
 	}
 
+	subscriber := pubsub.NewSubscriber(ctx, redis_url, config.REDIS_TOPIC_MARK_PRICE, onMsg)
+	go subscriber.Run()
+
 	publisher := pubsub.NewPublisher(ctx, redis_url)
-	rdb := redis.NewClient(&redis.Options{
-		Addr: redis_url,
-	})
 
 	// see https://taichi.network/#gasnow
 	client, _, err := websocket.DefaultDialer.Dial("wss://www.gasnow.org/ws", nil)
@@ -68,21 +81,20 @@ func main() {
 		ws_msg := WebsocketMsg{}
 		json.Unmarshal(message, &ws_msg)
 
-		eth_price_str, err := rdb.Get(ctx, config.REDIS_TOPIC_ETH_PRICE).Result()
-		if err != nil {
-			log.Fatal(err)
-		}
-		eth_price, _ := strconv.ParseFloat(eth_price_str, 64)
-
 		gas_price := &GasPrice{
-			Rapid:     fromWei(ws_msg.Data.GasPrices.Rapid, eth_price),
-			Fast:      fromWei(ws_msg.Data.GasPrices.Fast, eth_price),
-			Standard:  fromWei(ws_msg.Data.GasPrices.Standard, eth_price),
-			Slow:      fromWei(ws_msg.Data.GasPrices.Slow, eth_price),
+			Rapid:     fromWei(ws_msg.Data.GasPrices.Rapid, ethPrice),
+			Fast:      fromWei(ws_msg.Data.GasPrices.Fast, ethPrice),
+			Standard:  fromWei(ws_msg.Data.GasPrices.Standard, ethPrice),
+			Slow:      fromWei(ws_msg.Data.GasPrices.Slow, ethPrice),
 			Timestamp: ws_msg.Data.Timestamp,
 		}
 		json_txt, _ := json.Marshal(&gas_price)
 
-		publisher.Publish(config.REDIS_TOPIC_ETH_GAS_PRICE, string(json_txt))
+		if ethPrice > 0 {
+			publisher.Publish(config.REDIS_TOPIC_ETH_GAS_PRICE, string(json_txt))
+		}
 	}
+
+	// publisher.Close()
+	// subscriber.Close()
 }
