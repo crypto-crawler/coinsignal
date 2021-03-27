@@ -8,8 +8,8 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/soulmachine/coinsignal/config"
-	"github.com/soulmachine/coinsignal/pojo"
 	"github.com/soulmachine/coinsignal/pubsub"
+	"github.com/soulmachine/coinsignal/utils"
 )
 
 // price in Wei
@@ -44,20 +44,6 @@ func fromWei(wei uint64, eth_price float64) float64 {
 	return float64(wei) / 1000000000000000000 * 21000 * eth_price
 }
 
-var ethPrice = 0.0
-
-func onMsg(msg string) {
-	var mark_prices []pojo.MarkPrice
-	if err := json.Unmarshal([]byte(msg), &mark_prices); err != nil {
-		panic(err)
-	}
-	for _, x := range mark_prices {
-		if x.Currency == "ETH" {
-			ethPrice = x.Price
-		}
-	}
-}
-
 func main() {
 	ctx := context.Background()
 
@@ -66,9 +52,7 @@ func main() {
 		log.Fatal("The REDIS_URL environment variable is empty")
 	}
 
-	subscriber := pubsub.NewSubscriber(ctx, redis_url, config.REDIS_TOPIC_MARK_PRICE, onMsg)
-	go subscriber.Run()
-
+	priceUpdater := utils.NewPriceUpdater(ctx, redis_url)
 	publisher := pubsub.NewPublisher(ctx, redis_url)
 
 	// see https://taichi.network/#gasnow
@@ -81,6 +65,8 @@ func main() {
 		ws_msg := WebsocketMsg{}
 		json.Unmarshal(message, &ws_msg)
 
+		ethPrice := priceUpdater.GetPrice("ETH")
+
 		gas_price := &GasPrice{
 			Rapid:     fromWei(ws_msg.Data.GasPrices.Rapid, ethPrice),
 			Fast:      fromWei(ws_msg.Data.GasPrices.Fast, ethPrice),
@@ -90,11 +76,11 @@ func main() {
 		}
 		json_txt, _ := json.Marshal(&gas_price)
 
-		if ethPrice > 0 {
+		if ethPrice > 0.0 {
 			publisher.Publish(config.REDIS_TOPIC_ETH_GAS_PRICE, string(json_txt))
 		}
 	}
 
 	// publisher.Close()
-	// subscriber.Close()
+	// priceUpdater.Close()
 }

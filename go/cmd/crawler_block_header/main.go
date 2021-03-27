@@ -15,8 +15,8 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/soulmachine/coinsignal/config"
-	"github.com/soulmachine/coinsignal/pojo"
 	"github.com/soulmachine/coinsignal/pubsub"
+	"github.com/soulmachine/coinsignal/utils"
 )
 
 // return ETH number
@@ -47,20 +47,6 @@ func fetchBlockReward(blockNumber int64) float64 {
 	return 4.54104 // default value, see https://bitinfocharts.com/ethereum/
 }
 
-var ethPrice = 0.0
-
-func onMsg(msg string) {
-	var mark_prices []pojo.MarkPrice
-	if err := json.Unmarshal([]byte(msg), &mark_prices); err != nil {
-		panic(err)
-	}
-	for _, x := range mark_prices {
-		if x.Currency == "ETH" {
-			ethPrice = x.Price
-		}
-	}
-}
-
 func main() {
 	ctx := context.Background()
 
@@ -74,8 +60,7 @@ func main() {
 		log.Fatal("The REDIS_URL environment variable is empty")
 	}
 
-	subscriber := pubsub.NewSubscriber(ctx, redis_url, config.REDIS_TOPIC_MARK_PRICE, onMsg)
-	go subscriber.Run()
+	priceUpdater := utils.NewPriceUpdater(ctx, redis_url)
 
 	client, err := ethclient.Dial(full_node_url)
 	if err != nil {
@@ -100,6 +85,8 @@ func main() {
 			blockNumber, _ := strconv.ParseInt(string(blockNumberBytes), 0, 64)
 			blockReward := fetchBlockReward(blockNumber)
 
+			ethPrice := priceUpdater.GetPrice("ETH")
+
 			blockRewardUSD := blockReward * ethPrice
 
 			json_bytes, _ = jsonparser.Set(json_bytes, []byte(strconv.FormatFloat(blockReward, 'f', -1, 64)), "reward")
@@ -122,4 +109,7 @@ func main() {
 			}
 		}
 	}
+
+	// publisher.Close()
+	// priceUpdater.Close()
 }
