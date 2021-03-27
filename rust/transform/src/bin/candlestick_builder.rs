@@ -1,11 +1,22 @@
 use crypto_market_type::MarketType;
 use crypto_msg_parser::{TradeMsg, TradeSide};
+use lazy_static::lazy_static;
 use log::*;
 use serde::{Deserialize, Serialize};
-use std::time::{SystemTime, UNIX_EPOCH};
 use std::{collections::HashMap, time::Instant};
+use std::{
+    collections::HashSet,
+    time::{SystemTime, UNIX_EPOCH},
+};
 use transform::constants::*;
 use utils::pubsub::Publisher;
+
+lazy_static! {
+    // see https://www.stablecoinswar.com/
+    static ref STABLE_COINS: HashSet<&'static str> = vec![
+        "USDT", "USDC", "BUSD", "DAI", "PAX", "HUSD", "TUSD", "GUSD"
+        ].into_iter().collect();
+}
 
 #[derive(Serialize, Deserialize)]
 struct Candlestick {
@@ -189,6 +200,13 @@ fn main() {
         let msg = pubsub.get_message().unwrap();
         let payload: String = msg.get_payload().unwrap();
         let trade_msg = serde_json::from_str::<TradeMsg>(&payload).unwrap();
+
+        let v: Vec<&str> = trade_msg.pair.split('_').collect();
+        // let base = v[0];
+        let quote = v[1];
+        if !STABLE_COINS.contains(quote) {
+            continue;
+        }
 
         let key = format!(
             "{}-{}-{}-{}",
