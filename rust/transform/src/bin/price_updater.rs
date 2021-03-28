@@ -7,6 +7,9 @@ use std::{
     sync::{Arc, Mutex},
     thread::{self, JoinHandle},
 };
+use transform::constants::{
+    REDIS_TOPIC_CURRENCY_PRICE, REDIS_TOPIC_CURRENCY_PRICE_CHANNEL, REDIS_TOPIC_TRADE,
+};
 
 const BETA: f64 = 0.9; // Vt=βVt-1 + (1-β)
 
@@ -57,7 +60,7 @@ impl PriceUpdater {
             let client = redis::Client::open(redis_url).unwrap();
             let mut connection = client.get_connection().unwrap();
             let mut pubsub = connection.as_pubsub();
-            pubsub.subscribe("coinsignal:trade").unwrap();
+            pubsub.subscribe(REDIS_TOPIC_TRADE).unwrap();
 
             loop {
                 let msg = pubsub.get_message().unwrap();
@@ -93,7 +96,7 @@ impl PriceUpdater {
             let mut connection = client.get_connection().unwrap();
             let mut pubsub = connection.as_pubsub();
             pubsub
-                .subscribe("coinsignal:currency_price_channel")
+                .subscribe(REDIS_TOPIC_CURRENCY_PRICE_CHANNEL)
                 .unwrap();
 
             loop {
@@ -127,7 +130,7 @@ impl PriceUpdater {
         };
         guard.insert(currency.to_string(), price_ema);
         let _ = conn.lock().unwrap().hset::<&str, &str, f64, i64>(
-            "coinsignal:currency_price",
+            REDIS_TOPIC_CURRENCY_PRICE,
             currency,
             price_ema,
         );
