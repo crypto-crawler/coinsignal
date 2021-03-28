@@ -63,14 +63,17 @@ impl PriceCache {
             let client = redis::Client::open(redis_url).unwrap();
             let mut conn = client.get_connection().unwrap();
 
-            if let Ok(map) = conn.hgetall::<&str, HashMap<String, f64>>("coinsignal:currency_price")
-            {
-                let mut guard = prices_clone.lock().unwrap();
-                for (k, v) in map.iter() {
-                    guard.insert(k.clone(), *v);
+            loop {
+                if let Ok(map) =
+                    conn.hgetall::<&str, HashMap<String, f64>>("coinsignal:currency_price")
+                {
+                    let mut guard = prices_clone.lock().unwrap();
+                    for (k, v) in map.iter() {
+                        guard.insert(k.clone(), *v);
+                    }
                 }
+                std::thread::sleep(Duration::from_secs(3));
             }
-            std::thread::sleep(Duration::from_secs(3));
         });
     }
 

@@ -39,6 +39,7 @@ func (cache *PriceCache) WaitUntilReady() {
 		if cache.isReady() {
 			break
 		} else {
+			log.Println("price cache is not ready yet")
 			time.Sleep(3 * time.Second)
 		}
 	}
@@ -55,13 +56,17 @@ func (cache *PriceCache) Close() {
 
 // retrieves every 3 seconds
 func (cache *PriceCache) update() {
-	m, err := cache.client.HGetAll(cache.ctx, config.REDIS_TOPIC_CURRENCY_PRICE).Result()
+	for {
+		m, err := cache.client.HGetAll(cache.ctx, config.REDIS_TOPIC_CURRENCY_PRICE).Result()
 
-	if err != nil {
-		for k, v := range m {
-			price, _ := strconv.ParseFloat(v, 64)
-			cache.prices[k] = price
+		if err == nil {
+			for k, v := range m {
+				price, _ := strconv.ParseFloat(v, 64)
+				cache.prices[k] = price
+			}
 		}
+
+		time.Sleep(3 * time.Second)
 	}
 }
 
@@ -69,8 +74,6 @@ func (cache *PriceCache) isReady() bool {
 	for _, currency := range HOT_CURRENCIES {
 		if _, ok := cache.prices[currency]; !ok {
 			return false
-		} else {
-			log.Println("price cache is not ready yet")
 		}
 	}
 	return true
