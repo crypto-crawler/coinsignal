@@ -61,6 +61,7 @@ func main() {
 	}
 
 	priceCache := utils.NewPriceCache(ctx, redis_url)
+	priceCache.WaitUntilReady()
 
 	client, err := ethclient.Dial(full_node_url)
 	if err != nil {

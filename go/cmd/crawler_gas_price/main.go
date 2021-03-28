@@ -53,6 +53,7 @@ func main() {
 	}
 
 	priceCache := utils.NewPriceCache(ctx, redis_url)
+	priceCache.WaitUntilReady()
 	publisher := pubsub.NewPublisher(ctx, redis_url)
 
 	// see https://taichi.network/#gasnow

@@ -1,3 +1,4 @@
+use log::*;
 use redis::Commands;
 use serde::{Deserialize, Serialize};
 use std::{
@@ -6,6 +7,11 @@ use std::{
     thread,
     time::Duration,
 };
+
+const HOT_CURRENCIES: [&'static str; 14] = [
+    "BTC", "ETH", "BNB", "ADA", "DOT", "XRP", "UNI", "LTC", "THETA", "LINK", "BCH", "XLM", "KLAY",
+    "FIL",
+];
 
 pub struct PriceCache {
     redis_url: String,
@@ -28,6 +34,18 @@ impl PriceCache {
         cache.run(); // retreive prices per 3 seconds
 
         cache
+    }
+
+    pub fn wait_until_ready(&self) {
+        loop {
+            let ready = self.is_ready();
+            if ready {
+                break;
+            } else {
+                info!("price cache is not ready yet");
+                std::thread::sleep(Duration::from_secs(3));
+            }
+        }
     }
 
     pub fn get_price(&self, currency: &str) -> Option<f64> {
@@ -54,5 +72,14 @@ impl PriceCache {
             }
             std::thread::sleep(Duration::from_secs(3));
         });
+    }
+
+    fn is_ready(&self) -> bool {
+        for &currency in HOT_CURRENCIES.iter() {
+            if !self.prices.lock().unwrap().contains_key(currency) {
+                return false;
+            }
+        }
+        return true;
     }
 }

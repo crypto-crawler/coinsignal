@@ -2,11 +2,15 @@ package utils
 
 import (
 	"context"
+	"log"
 	"strconv"
+	"time"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/soulmachine/coinsignal/config"
 )
+
+var HOT_CURRENCIES = []string{"BTC", "ETH", "BNB", "ADA", "DOT", "XRP", "UNI", "LTC", "THETA", "LINK", "BCH", "XLM", "KLAY", "FIL"}
 
 type PriceCache struct {
 	client *redis.Client
@@ -21,13 +25,23 @@ func NewPriceCache(ctx context.Context, redis_url string) *PriceCache {
 
 	cache := &PriceCache{
 		client: client,
-		ctx: ctx,
+		ctx:    ctx,
 		prices: make(map[string]float64),
 	}
 
 	go cache.update()
 
 	return cache
+}
+
+func (cache *PriceCache) WaitUntilReady() {
+	for {
+		if cache.isReady() {
+			break
+		} else {
+			time.Sleep(3 * time.Second)
+		}
+	}
 }
 
 func (cache *PriceCache) GetPrice(currency string) float64 {
@@ -49,4 +63,15 @@ func (cache *PriceCache) update() {
 			cache.prices[k] = price
 		}
 	}
+}
+
+func (cache *PriceCache) isReady() bool {
+	for _, currency := range HOT_CURRENCIES {
+		if _, ok := cache.prices[currency]; !ok {
+			return false
+		} else {
+			log.Println("price cache is not ready yet")
+		}
+	}
+	return true
 }

@@ -58,9 +58,13 @@ struct Candlestick {
     volume_quote_sell: f64, // quote volume at sell side
     volume_quote_buy: f64,  // quote volume at buy side
 
-    volume_usd: f64,      // quote volume
-    volume_usd_sell: f64, // quote volume at sell side
-    volume_usd_buy: f64,  // quote volume at buy side
+    volume_usd: f64,      // volume converted to USD
+    volume_usd_sell: f64, // volume_usd at sell side
+    volume_usd_buy: f64,  // volume_usd at buy side
+
+    volume_btc: f64,      // volume converted to BTC
+    volume_btc_sell: f64, // volume_btc at sell side
+    volume_btc_buy: f64,  // volume_btc at buy side
 
     vwap: f64, // volume weighted average price
 
@@ -185,6 +189,8 @@ fn build_candlestick(
         .map(|x| calc_volume_usd(x))
         .sum();
 
+    let btc_price = PRICE_CACHE.get_price("BTC").unwrap();
+
     let candlestick = Candlestick {
         exchange: trades[0].exchange.clone(),
         market_type: trades[0].market_type,
@@ -208,6 +214,9 @@ fn build_candlestick(
         volume_usd,
         volume_usd_sell,
         volume_usd_buy,
+        volume_btc: volume_usd / btc_price,
+        volume_btc_sell: volume_usd_sell / btc_price,
+        volume_btc_buy: volume_usd_buy / btc_price,
 
         vwap: volume_quote / volume,
 
@@ -231,6 +240,7 @@ fn is_good(quote: &str) -> bool {
 // Merge trades into 1-minute klines
 fn main() {
     env_logger::init();
+    PRICE_CACHE.wait_until_ready();
 
     let mut publisher = Publisher::new(*REDIS_URL);
 
