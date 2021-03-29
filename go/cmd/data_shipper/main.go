@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -44,7 +43,8 @@ func main() {
 	if len(influxdb_token) == 0 {
 		log.Fatal("The INFLUXDB_BUCKET environment variable is empty")
 	}
-	client := influxdb2.NewClient(influxdb_url, influxdb_token)
+	client := influxdb2.NewClientWithOptions(influxdb_url, influxdb_token,
+		influxdb2.DefaultOptions().SetBatchSize(32))
 
 	// Get non-blocking write client
 	writeAPI := client.WriteAPI(influxdb_org, influxdb_bucket)
@@ -114,9 +114,9 @@ func main() {
 			{
 				global_metrics := make(map[string]interface{})
 				err := json.Unmarshal([]byte(msg.Payload), &global_metrics)
-				fmt.Println(msg.Payload)
-				tm, _ := time.Parse(time.RFC3339, global_metrics["last_updated"].(string))
+
 				if err == nil {
+					tm, _ := time.Parse(time.RFC3339, global_metrics["last_updated"].(string))
 					p := influxdb2.NewPoint("cmc_global_metrics",
 						map[string]string{},
 						global_metrics,

@@ -154,7 +154,7 @@ func main() {
 		id, _ := strconv.ParseInt(string(idStr), 0, 64)
 		currency, ok := currencyMap[id]
 		if !ok {
-			log.Println("Failed to find symbol for id ", id)
+			// log.Println("Failed to find symbol for id ", id)
 			continue
 		}
 		price, _ := strconv.ParseFloat(string(priceStr), 64)
