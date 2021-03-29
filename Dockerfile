@@ -6,7 +6,7 @@ WORKDIR /project
 COPY ./rust/ ./
 RUN cargo build --release
 
-FROM golang:buster AS go_builder
+FROM golang:latest AS go_builder
 
 RUN mkdir /project
 WORKDIR /project

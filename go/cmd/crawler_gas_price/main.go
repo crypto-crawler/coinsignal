@@ -8,6 +8,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/soulmachine/coinsignal/config"
+	"github.com/soulmachine/coinsignal/pojo"
 	"github.com/soulmachine/coinsignal/pubsub"
 	"github.com/soulmachine/coinsignal/utils"
 )
@@ -22,21 +23,12 @@ type GasPriceMsg struct {
 
 type Data struct {
 	GasPrices GasPriceMsg `json:"gasPrices"`
-	Timestamp uint64      `json:"timestamp"`
+	Timestamp int64       `json:"timestamp"`
 }
 
 type WebsocketMsg struct {
 	Type string `json:"type"`
 	Data Data   `json:"data"`
-}
-
-// price in USD
-type GasPrice struct {
-	Rapid     float64 `json:"rapid"`
-	Fast      float64 `json:"fast"`
-	Standard  float64 `json:"standard"`
-	Slow      float64 `json:"slow"`
-	Timestamp uint64  `json:"timestamp"`
 }
 
 // wei to USD
@@ -68,7 +60,7 @@ func main() {
 
 		ethPrice := priceCache.GetPrice("ETH")
 
-		gas_price := &GasPrice{
+		gas_price := &pojo.GasPrice{
 			Rapid:     fromWei(ws_msg.Data.GasPrices.Rapid, ethPrice),
 			Fast:      fromWei(ws_msg.Data.GasPrices.Fast, ethPrice),
 			Standard:  fromWei(ws_msg.Data.GasPrices.Standard, ethPrice),

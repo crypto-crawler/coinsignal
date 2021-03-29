@@ -9,28 +9,18 @@ services:
     restart: always
 
   influxdb:
-    image: influxdb:1.8
+    image: influxdb:latest
     ports:
       - 8086:8086
     environment:
-      - INFLUXDB_DB=coinsignal
-      - INFLUXDB_ADMIN_USER=admin
-      - INFLUXDB_ADMIN_PASSWORD=passw0rd
-      - INFLUXDB_HTTP_AUTH_ENABLED=true
-      - INFLUXDB_HTTP_FLUX_ENABLED=true
-      - INFLUXDB_LOGGING_LEVEL=warn
-      - INFLUXDB_HTTP_LOG_ENABLED=false
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=passw0rd
+      - DOCKER_INFLUXDB_INIT_ORG=soulmachine
+      - DOCKER_INFLUXDB_INIT_BUCKET=coinsignal
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=my-t0ken
     volumes:
-      - "influxdb_data:/var/lib/influxdb"
-    restart: always
-
-  logstash:
-    build:
-      context: ./containers/logstash
-    image: logstash:latest
-    depends_on:
-      - redis
-      - influxdb
+      - "influxdb2_data:/var/lib/influxdb2"
     restart: always
 
   grafana:
@@ -51,7 +41,7 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
-    image: coinsignal:latest
+    image: coinsignal:crawlers
     environment:
       - REDIS_URL=redis:6379
       - FULL_NODE_URL=wss://mainnet.infura.io/ws/v3/6866aa0c8c3d48638fedf2d83c85f4b8
