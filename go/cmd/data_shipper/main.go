@@ -23,6 +23,7 @@ func main() {
 	if len(redis_url) == 0 {
 		log.Fatal("The REDIS_URL environment variable is empty")
 	}
+	utils.WaitRedis(ctx, redis_url)
 	rdb := redis.NewClient(&redis.Options{
 		Addr: redis_url,
 	})
@@ -45,6 +46,7 @@ func main() {
 	}
 	client := influxdb2.NewClientWithOptions(influxdb_url, influxdb_token,
 		influxdb2.DefaultOptions().SetBatchSize(32))
+	utils.WaitInfluxDB(ctx, client)
 
 	// Get non-blocking write client
 	writeAPI := client.WriteAPI(influxdb_org, influxdb_bucket)
