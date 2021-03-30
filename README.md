@@ -19,3 +19,9 @@ Open Grafana at <http://localhost:3000> in browser and login with `admin` and `p
 ![Architecture](./architecture.png)
 
 - I tried to use Kafka as the message queue, but it's too heavy, so I used Redis instead.
+
+## Build
+
+```bash
+docker build -t soulmachine/coinsignal:crawlers .
+```

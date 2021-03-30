@@ -1,13 +1,6 @@
 version: "3.9"
 
 services:
-  redis:
-    image: redis:latest
-    command: redis-server --save "" --appendonly no
-    ports:
-      - 6379:6379
-    restart: always
-
   influxdb:
     image: influxdb:latest
     ports:
@@ -41,19 +34,19 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
-    image: coinsignal:crawlers
+    image: soulmachine/coinsignal:crawlers
+    ports:
+      - 6379:6379
     environment:
-      - REDIS_URL=redis:6379
-      - FULL_NODE_URL=wss://mainnet.infura.io/ws/v3/6866aa0c8c3d48638fedf2d83c85f4b8
-      - CMC_API_KEY=1fb6c6ba-e6de-430b-81ec-ac8909b03a07
-      - ETHERSCAN_API_KEY=HHS8I3EHGDS8NIUJERJ9CW5E3BEC8K34E9
+      - FULL_NODE_URL # wss://mainnet.infura.io/ws/v3/YOUR-PROJECT-ID
+      - CMC_API_KEY
+      - ETHERSCAN_API_KEY
       - INFLUXDB_URL=http://influxdb:8086
       - INFLUXDB_TOKEN=my-t0ken
       - INFLUXDB_ORG=soulmachine
       - INFLUXDB_BUCKET=coinsignal
     depends_on:
       - influxdb
-      - redis
     restart: always
 
 volumes:

@@ -41,6 +41,15 @@ const market_types = {
 
 const apps = [];
 
+apps.push({
+  name: "redis",
+  script: 'redis-server --save "" --protected-mode no --appendonly no',
+  exec_interpreter: "none",
+  exec_mode: "fork",
+  instances: 1,
+  restart_delay: 1000, // 1 seconds
+});
+
 Object.keys(market_types).forEach((exchange) => {
   market_types[exchange].forEach((market_ype) => {
     const app = {
