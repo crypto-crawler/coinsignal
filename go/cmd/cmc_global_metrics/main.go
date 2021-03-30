@@ -11,6 +11,7 @@ import (
 	"github.com/buger/jsonparser"
 	"github.com/soulmachine/coinsignal/config"
 	"github.com/soulmachine/coinsignal/pubsub"
+	"github.com/soulmachine/coinsignal/utils"
 )
 
 func fetch_cmc_global_metrics() string {
@@ -49,12 +50,16 @@ func fetch_cmc_global_metrics() string {
 }
 
 func main() {
-	metrics := fetch_cmc_global_metrics()
+	ctx := context.Background()
+
 	redis_url := os.Getenv("REDIS_URL")
 	if len(redis_url) == 0 {
 		log.Fatal("The REDIS_URL environment variable is empty")
 	}
+	utils.WaitRedis(ctx, redis_url)
 
-	publisher := pubsub.NewPublisher(context.Background(), redis_url)
+	metrics := fetch_cmc_global_metrics()
+
+	publisher := pubsub.NewPublisher(ctx, redis_url)
 	publisher.Publish(config.REDIS_TOPIC_CMC_GLOBAL_METRICS, string(metrics))
 }

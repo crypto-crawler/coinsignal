@@ -10,6 +10,7 @@ use std::{
 use transform::constants::{
     REDIS_TOPIC_CURRENCY_PRICE, REDIS_TOPIC_CURRENCY_PRICE_CHANNEL, REDIS_TOPIC_TRADE,
 };
+use utils::wait_redis;
 
 const BETA: f64 = 0.9; // Vt=βVt-1 + (1-β)
 
@@ -151,6 +152,7 @@ fn main() {
         }
         Box::leak(url.into_boxed_str())
     };
+    wait_redis(redis_url);
 
     let updater = PriceUpdater::new(redis_url);
     updater.run();

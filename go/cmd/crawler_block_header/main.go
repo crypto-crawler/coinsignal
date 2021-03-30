@@ -59,6 +59,7 @@ func main() {
 	if len(redis_url) == 0 {
 		log.Fatal("The REDIS_URL environment variable is empty")
 	}
+	utils.WaitRedis(ctx, redis_url)
 
 	priceCache := utils.NewPriceCache(ctx, redis_url)
 	priceCache.WaitUntilReady()

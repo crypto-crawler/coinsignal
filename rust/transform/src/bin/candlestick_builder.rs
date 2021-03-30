@@ -9,7 +9,7 @@ use std::hash::{Hash, Hasher};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use transform::constants::*;
-use utils::{pubsub::Publisher, PriceCache};
+use utils::{pubsub::Publisher, wait_redis, PriceCache};
 
 lazy_static! {
     // see https://www.stablecoinswar.com/
@@ -305,6 +305,7 @@ fn main() {
         }
         Box::leak(url.into_boxed_str())
     };
+    wait_redis(redis_url);
 
     let mut publisher = Publisher::new(redis_url);
 

@@ -7,7 +7,7 @@ use std::{
     str::FromStr,
     sync::{Arc, Mutex},
 };
-use utils::pubsub::Publisher;
+use utils::{pubsub::Publisher, wait_redis};
 
 pub fn crawl(exchange: &'static str, market_type: MarketType, redis_url: &'static str) {
     let publisher = Arc::new(Mutex::new(Publisher::new(redis_url)));
@@ -55,6 +55,7 @@ fn main() {
         }
         Box::leak(url.into_boxed_str())
     };
+    wait_redis(redis_url);
 
     crawl(exchange, market_type, redis_url);
 }

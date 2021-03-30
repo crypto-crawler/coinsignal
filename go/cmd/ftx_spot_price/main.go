@@ -15,6 +15,7 @@ import (
 	"github.com/soulmachine/coinsignal/config"
 	"github.com/soulmachine/coinsignal/pojo"
 	"github.com/soulmachine/coinsignal/pubsub"
+	"github.com/soulmachine/coinsignal/utils"
 )
 
 // Get spot currency prices, mainly for fiat currencies
@@ -52,12 +53,14 @@ func fetchFtxMarkets() map[string]float64 {
 }
 
 func main() {
+	ctx := context.Background()
 
 	redis_url := os.Getenv("REDIS_URL")
 	if len(redis_url) == 0 {
 		log.Fatal("The REDIS_URL environment variable is empty")
 	}
-	publisher := pubsub.NewPublisher(context.Background(), redis_url)
+	utils.WaitRedis(ctx, redis_url)
+	publisher := pubsub.NewPublisher(ctx, redis_url)
 
 	for {
 		mapping := fetchFtxMarkets()

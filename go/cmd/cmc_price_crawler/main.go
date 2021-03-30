@@ -14,6 +14,7 @@ import (
 	"github.com/soulmachine/coinsignal/config"
 	"github.com/soulmachine/coinsignal/pojo"
 	"github.com/soulmachine/coinsignal/pubsub"
+	"github.com/soulmachine/coinsignal/utils"
 )
 
 // CoinMarketCap top 100 cryptocurrencies
@@ -127,6 +128,7 @@ func main() {
 	if len(redis_url) == 0 {
 		log.Fatal("The REDIS_URL environment variable is empty")
 	}
+	utils.WaitRedis(ctx, redis_url)
 	publisher := pubsub.NewPublisher(ctx, redis_url)
 
 	client, _, err := websocket.DefaultDialer.Dial("wss://stream.coinmarketcap.com/price/latest", nil)

@@ -11,6 +11,7 @@ import (
 	"github.com/soulmachine/coinsignal/config"
 	"github.com/soulmachine/coinsignal/pojo"
 	"github.com/soulmachine/coinsignal/pubsub"
+	"github.com/soulmachine/coinsignal/utils"
 )
 
 type MarkPriceRaw struct {
@@ -25,6 +26,7 @@ func main() {
 	if len(redis_url) == 0 {
 		log.Fatal("The REDIS_URL environment variable is empty")
 	}
+	utils.WaitRedis(ctx, redis_url)
 	publisher := pubsub.NewPublisher(ctx, redis_url)
 
 	// https://binance-docs.github.io/apidocs/futures/en/#mark-price-stream
