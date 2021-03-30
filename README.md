@@ -9,6 +9,7 @@ If you want to run this project locally, please read on.
 ## Quickstart
 
 ```bash
+# set environment variables FULL_NODE_URL, CMC_API_KEY, ETHERSCAN_API_KEY in your terminal
 docker-compose up
 ```
 
