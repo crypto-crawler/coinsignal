@@ -25,10 +25,10 @@ func main() {
 	if len(redis_url) == 0 {
 		log.Fatal("The REDIS_URL environment variable is empty")
 	}
-	utils.WaitRedis(ctx, redis_url)
 	rdb := redis.NewClient(&redis.Options{
 		Addr: redis_url,
 	})
+	utils.WaitRedis(ctx, redis_url)
 
 	influxdb_url := os.Getenv("INFLUXDB_URL")
 	if len(influxdb_url) == 0 {
@@ -109,16 +109,23 @@ func handleMessage(msg *redis.Message, writeAPI api.WriteAPI) {
 				pair := candlestick["pair"].(string)
 				arr := strings.Split(pair, "/")
 
+				tags := map[string]string{
+					"exchange":    candlestick["exchange"].(string),
+					"market_type": candlestick["market_type"].(string),
+					"symbol":      candlestick["symbol"].(string),
+					"pair":        candlestick["pair"].(string),
+					"base":        arr[0],
+					"quote":       arr[1],
+					"bar_size":    strconv.Itoa(int(candlestick["bar_size"].(float64))),
+				}
+				delete(candlestick, "exchange")
+				delete(candlestick, "market_type")
+				delete(candlestick, "symbol")
+				delete(candlestick, "pair")
+				delete(candlestick, "bar_size")
+
 				p := influxdb2.NewPoint("candlestick_ext",
-					map[string]string{
-						"exchange":    candlestick["exchange"].(string),
-						"market_type": candlestick["market_type"].(string),
-						"symbol":      candlestick["symbol"].(string),
-						"pair":        candlestick["pair"].(string),
-						"base":        arr[0],
-						"quote":       arr[1],
-						"bar_size":    strconv.Itoa(int(candlestick["bar_size"].(float64))),
-					},
+					tags,
 					candlestick,
 					utils.FromUnixMilli(int64(candlestick["timestamp"].(float64))),
 				)
