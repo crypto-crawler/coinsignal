@@ -98,7 +98,7 @@ func main() {
 				err := json.Unmarshal([]byte(msg.Payload), &candlestick)
 				if err == nil {
 					pair := candlestick["pair"].(string)
-					arr := strings.Split(pair, ",")
+					arr := strings.Split(pair, "/")
 
 					p := influxdb2.NewPoint("candlestick_ext",
 						map[string]string{
