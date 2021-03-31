@@ -22,7 +22,6 @@ RUN go build -o cmc_global_metrics cmd/cmc_global_metrics/main.go \
 
 FROM node:buster-slim
 
-COPY --from=rust_builder /project/target/release/trade_crawler /usr/local/bin/
 COPY --from=rust_builder /project/target/release/candlestick_builder /usr/local/bin/
 COPY --from=rust_builder /project/target/release/price_updater /usr/local/bin/
 
@@ -35,14 +34,11 @@ COPY --from=go_builder /project/data_shipper /usr/local/bin/
 COPY --from=go_builder /project/ftx_spot_price /usr/local/bin/
 
 RUN apt-get -qy update && apt-get -qy --no-install-recommends install \
-    ca-certificates curl redis-server \
+    ca-certificates curl \
  && npm install pm2 -g --production \
  && apt-get -qy autoremove && apt-get clean && rm -rf /var/lib/apt/lists/* && rm -rf /tmp/*
 
 COPY ./pm2.config.js /root/pm2.config.js
-
-ENV REDIS_URL redis://localhost:6379
-EXPOSE 6379
 
 ENV RUST_LOG "warn"
 ENV RUST_BACKTRACE 1

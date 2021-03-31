@@ -1,6 +1,13 @@
 version: "3.9"
 
 services:
+  redis:
+    image: redis:latest
+    command: redis-server --save "" --appendonly no
+    ports:
+      - 6379:6379
+    restart: always
+
   influxdb:
     image: influxdb:latest
     ports:
@@ -30,23 +37,35 @@ services:
       - influxdb
     restart: always
 
+  carbonbot:
+    image: soulmachine/carbonbot:debian
+    command: ["pm2-runtime", "start", "pm2.trade.config.js"]
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - DATA_DIR # unset
+      - PARSER=true
+    depends_on:
+      - redis
+    restart: always
+
   crawlers:
     build:
       context: ./
       dockerfile: Dockerfile
-    image: soulmachine/coinsignal:crawlers
-    ports:
-      - 6379:6379
+    image: coinsignal:crawlers
     environment:
       - FULL_NODE_URL # wss://mainnet.infura.io/ws/v3/YOUR-PROJECT-ID
       - CMC_API_KEY
       - ETHERSCAN_API_KEY
+      - REDIS_URL=redis://redis:6379
       - INFLUXDB_URL=http://influxdb:8086
       - INFLUXDB_TOKEN=my-t0ken
       - INFLUXDB_ORG=soulmachine
       - INFLUXDB_BUCKET=coinsignal
     depends_on:
+      - carbonbot
       - influxdb
+      - redis
     restart: always
 
 volumes:

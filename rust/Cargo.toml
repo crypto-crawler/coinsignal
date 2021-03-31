@@ -1,6 +1,5 @@
 [workspace]
 members = [
-  "crypto-crawlers",
   "transform",
   "utils"
 ]
