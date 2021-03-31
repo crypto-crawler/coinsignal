@@ -5,6 +5,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/go-redis/redis/v8"
+	"github.com/soulmachine/coinsignal/utils"
 )
 
 type Publisher struct {
@@ -13,9 +14,7 @@ type Publisher struct {
 }
 
 func NewPublisher(ctx context.Context, redis_url string) *Publisher {
-	rdb := redis.NewClient(&redis.Options{
-		Addr: redis_url,
-	})
+	rdb := utils.NewRedisClient(redis_url)
 	return &Publisher{rdb, ctx}
 }
 

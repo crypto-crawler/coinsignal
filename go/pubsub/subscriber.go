@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/go-redis/redis/v8"
+	"github.com/soulmachine/coinsignal/utils"
 )
 
 type Subscriber struct {
@@ -12,9 +13,7 @@ type Subscriber struct {
 }
 
 func NewSubscriber(ctx context.Context, redis_url, channel string, on_msg func(string)) *Subscriber {
-	rdb := redis.NewClient(&redis.Options{
-		Addr: redis_url,
-	})
+	rdb := utils.NewRedisClient(redis_url)
 	pubsub := rdb.Subscribe(ctx, channel)
 
 	return &Subscriber{pubsub, on_msg}

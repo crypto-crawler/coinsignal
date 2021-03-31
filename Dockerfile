@@ -41,7 +41,7 @@ RUN apt-get -qy update && apt-get -qy --no-install-recommends install \
 
 COPY ./pm2.config.js /root/pm2.config.js
 
-ENV REDIS_URL localhost:6379
+ENV REDIS_URL redis://localhost:6379
 EXPOSE 6379
 
 ENV RUST_LOG "warn"

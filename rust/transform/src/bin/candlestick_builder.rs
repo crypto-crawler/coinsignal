@@ -23,10 +23,7 @@ lazy_static! {
             );
             "redis://localhost:6379"
         } else {
-            let mut url = std::env::var("REDIS_URL").unwrap();
-            if !url.starts_with("redis://") {
-                url = format!("redis://{}", url);
-            }
+            let url = std::env::var("REDIS_URL").unwrap();
             Box::leak(url.into_boxed_str())
         };
 
@@ -299,10 +296,7 @@ fn main() {
         );
         "redis://localhost:6379"
     } else {
-        let mut url = std::env::var("REDIS_URL").unwrap();
-        if !url.starts_with("redis://") {
-            url = format!("redis://{}", url);
-        }
+        let url = std::env::var("REDIS_URL").unwrap();
         Box::leak(url.into_boxed_str())
     };
     wait_redis(redis_url);

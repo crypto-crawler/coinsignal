@@ -19,9 +19,7 @@ type PriceCache struct {
 }
 
 func NewPriceCache(ctx context.Context, redis_url string) *PriceCache {
-	client := redis.NewClient(&redis.Options{
-		Addr: redis_url,
-	})
+	client := NewRedisClient(redis_url)
 
 	cache := &PriceCache{
 		client: client,

@@ -8,10 +8,17 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
+func NewRedisClient(redis_url string) *redis.Client {
+  opt, err := redis.ParseURL(redis_url)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	return redis.NewClient(opt)
+}
+
 func pingRedis(ctx context.Context, redis_url string) bool {
-	client := redis.NewClient(&redis.Options{
-		Addr: redis_url,
-	})
+	client := NewRedisClient(redis_url)
 
 	_, err := client.Ping(ctx).Result()
 	return err == nil

@@ -25,9 +25,7 @@ func main() {
 	if len(redis_url) == 0 {
 		log.Fatal("The REDIS_URL environment variable is empty")
 	}
-	rdb := redis.NewClient(&redis.Options{
-		Addr: redis_url,
-	})
+	rdb := utils.NewRedisClient(redis_url)
 	utils.WaitRedis(ctx, redis_url)
 
 	influxdb_url := os.Getenv("INFLUXDB_URL")
