@@ -286,7 +286,7 @@ impl Candlestick {
     }
 }
 
-const INTERVAL: i64 = 60000; // 1 minutes in milliseconds
+const INTERVAL: i64 = 300000; // 5 minutes in milliseconds
 
 // Merge trades into 1-minute klines
 fn main() {
