@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -96,12 +97,17 @@ func main() {
 				candlestick := make(map[string]interface{})
 				err := json.Unmarshal([]byte(msg.Payload), &candlestick)
 				if err == nil {
+					pair := candlestick["pair"].(string)
+					arr := strings.Split(pair, ",")
+
 					p := influxdb2.NewPoint("candlestick_ext",
 						map[string]string{
 							"exchange":    candlestick["exchange"].(string),
 							"market_type": candlestick["market_type"].(string),
 							"symbol":      candlestick["symbol"].(string),
 							"pair":        candlestick["pair"].(string),
+							"base":        arr[0],
+							"quote":       arr[1],
 							"bar_size":    strconv.Itoa(int(candlestick["bar_size"].(float64))),
 						},
 						candlestick,
