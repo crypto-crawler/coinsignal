@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
+	"github.com/influxdata/influxdb-client-go/v2/api"
 	"github.com/soulmachine/coinsignal/config"
 	"github.com/soulmachine/coinsignal/pojo"
 	"github.com/soulmachine/coinsignal/utils"
@@ -61,85 +62,87 @@ func main() {
 
 	// Consume messages.
 	for msg := range pubsub.Channel() {
-		switch msg.Channel {
-		case config.REDIS_TOPIC_ETH_GAS_PRICE:
-			{
-				gas_price := pojo.GasPrice{}
-				json.Unmarshal([]byte(msg.Payload), &gas_price)
-
-				p := influxdb2.NewPointWithMeasurement("eth_gas_price").
-					AddField("rapid", gas_price.Rapid).
-					AddField("fast", gas_price.Fast).
-					AddField("standard", gas_price.Standard).
-					AddField("slow", gas_price.Slow).
-					SetTime(utils.FromUnixMilli(gas_price.Timestamp))
-
-				writeAPI.WritePoint(p)
-			}
-		case config.REDIS_TOPIC_ETH_BLOCK_HEADER:
-			{
-				block_header := pojo.BlockHeader{}
-				json.Unmarshal([]byte(msg.Payload), &block_header)
-
-				p := influxdb2.NewPointWithMeasurement("eth_block_header").
-					AddField("number", block_header.Number).
-					AddField("miner", block_header.Miner).
-					AddField("gasLimit", block_header.GasLimit).
-					AddField("gasUsed", block_header.GasUsed).
-					AddField("reward", block_header.Reward).
-					AddField("reward_usd", block_header.RewardUSD).
-					SetTime(time.Unix(block_header.Timestamp, 0))
-
-				writeAPI.WritePoint(p)
-			}
-		case config.REDIS_TOPIC_CANDLESTICK_EXT:
-			{
-				candlestick := make(map[string]interface{})
-				err := json.Unmarshal([]byte(msg.Payload), &candlestick)
-				if err == nil {
-					pair := candlestick["pair"].(string)
-					arr := strings.Split(pair, "/")
-
-					p := influxdb2.NewPoint("candlestick_ext",
-						map[string]string{
-							"exchange":    candlestick["exchange"].(string),
-							"market_type": candlestick["market_type"].(string),
-							"symbol":      candlestick["symbol"].(string),
-							"pair":        candlestick["pair"].(string),
-							"base":        arr[0],
-							"quote":       arr[1],
-							"bar_size":    strconv.Itoa(int(candlestick["bar_size"].(float64))),
-						},
-						candlestick,
-						utils.FromUnixMilli(int64(candlestick["timestamp"].(float64))),
-					)
-
-					writeAPI.WritePoint(p)
-				}
-
-			}
-		case config.REDIS_TOPIC_CMC_GLOBAL_METRICS:
-			{
-				global_metrics := make(map[string]interface{})
-				err := json.Unmarshal([]byte(msg.Payload), &global_metrics)
-
-				if err == nil {
-					tm, _ := time.Parse(time.RFC3339, global_metrics["last_updated"].(string))
-					p := influxdb2.NewPoint("cmc_global_metrics",
-						map[string]string{},
-						global_metrics,
-						tm,
-					)
-					writeAPI.WritePoint(p)
-				}
-
-			}
-		default:
-			log.Fatalf("Unknown channel %s", msg.Channel)
-		}
-
+		handleMessage(msg, writeAPI)
 	}
 
 	pubsub.Close()
 	rdb.Close()
+}
+
+func handleMessage(msg *redis.Message, writeAPI api.WriteAPI) {
+	switch msg.Channel {
+	case config.REDIS_TOPIC_ETH_GAS_PRICE:
+		{
+			gas_price := pojo.GasPrice{}
+			json.Unmarshal([]byte(msg.Payload), &gas_price)
+
+			p := influxdb2.NewPointWithMeasurement("eth_gas_price").
+				AddField("rapid", gas_price.Rapid).
+				AddField("fast", gas_price.Fast).
+				AddField("standard", gas_price.Standard).
+				AddField("slow", gas_price.Slow).
+				SetTime(utils.FromUnixMilli(gas_price.Timestamp))
+
+			writeAPI.WritePoint(p)
+		}
+	case config.REDIS_TOPIC_ETH_BLOCK_HEADER:
+		{
+			block_header := pojo.BlockHeader{}
+			json.Unmarshal([]byte(msg.Payload), &block_header)
+
+			p := influxdb2.NewPointWithMeasurement("eth_block_header").
+				AddField("number", block_header.Number).
+				AddField("miner", block_header.Miner).
+				AddField("gasLimit", block_header.GasLimit).
+				AddField("gasUsed", block_header.GasUsed).
+				AddField("reward", block_header.Reward).
+				AddField("reward_usd", block_header.RewardUSD).
+				SetTime(time.Unix(block_header.Timestamp, 0))
+
+			writeAPI.WritePoint(p)
+		}
+	case config.REDIS_TOPIC_CANDLESTICK_EXT:
+		{
+			candlestick := make(map[string]interface{})
+			err := json.Unmarshal([]byte(msg.Payload), &candlestick)
+			if err == nil {
+				pair := candlestick["pair"].(string)
+				arr := strings.Split(pair, "/")
+
+				p := influxdb2.NewPoint("candlestick_ext",
+					map[string]string{
+						"exchange":    candlestick["exchange"].(string),
+						"market_type": candlestick["market_type"].(string),
+						"symbol":      candlestick["symbol"].(string),
+						"pair":        candlestick["pair"].(string),
+						"base":        arr[0],
+						"quote":       arr[1],
+						"bar_size":    strconv.Itoa(int(candlestick["bar_size"].(float64))),
+					},
+					candlestick,
+					utils.FromUnixMilli(int64(candlestick["timestamp"].(float64))),
+				)
+
+				writeAPI.WritePoint(p)
+			}
+		}
+	case config.REDIS_TOPIC_CMC_GLOBAL_METRICS:
+		{
+			global_metrics := make(map[string]interface{})
+			err := json.Unmarshal([]byte(msg.Payload), &global_metrics)
+
+			if err == nil {
+				tm, _ := time.Parse(time.RFC3339, global_metrics["last_updated"].(string))
+				p := influxdb2.NewPoint("cmc_global_metrics",
+					map[string]string{},
+					global_metrics,
+					tm,
+				)
+				writeAPI.WritePoint(p)
+			}
+
+		}
+	default:
+		log.Fatalf("Unknown channel %s", msg.Channel)
+	}
 }
