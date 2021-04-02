@@ -174,19 +174,10 @@ func handleMessage(msg *redis.Message, writeAPI api.WriteAPI) {
 
 			p := influxdb2.NewPoint("funding_rate",
 				tags,
-				map[string]interface{}{"funding_rate": funding_rate["funding_rate"].(float64)},
-				utils.FromUnixMilli(int64(funding_rate["funding_time"].(float64))),
+				funding_rate,
+				utils.FromUnixMilli(int64(funding_rate["timestamp"].(float64))),
 			)
 			writeAPI.WritePoint(p)
-
-			if funding_rate["estimated_rate"] != nil {
-				p := influxdb2.NewPoint("estimated_funding_rate",
-					tags,
-					map[string]interface{}{"estimated_rate": funding_rate["estimated_rate"].(float64)},
-					utils.FromUnixMilli(int64(funding_rate["timestamp"].(float64))),
-				)
-				writeAPI.WritePoint(p)
-			}
 		}
 	default:
 		log.Fatalf("Unknown channel %s", msg.Channel)
