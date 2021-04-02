@@ -56,6 +56,7 @@ func main() {
 		config.REDIS_TOPIC_ETH_BLOCK_HEADER,
 		config.REDIS_TOPIC_CANDLESTICK_EXT,
 		config.REDIS_TOPIC_CMC_GLOBAL_METRICS,
+		config.REDIS_TOPIC_FUNDING_RATE,
 	)
 
 	// Consume messages.
@@ -146,6 +147,46 @@ func handleMessage(msg *redis.Message, writeAPI api.WriteAPI) {
 				writeAPI.WritePoint(p)
 			}
 
+		}
+	case config.REDIS_TOPIC_FUNDING_RATE:
+		{
+			funding_rate := make(map[string]interface{})
+			err := json.Unmarshal([]byte(msg.Payload), &funding_rate)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			pair := funding_rate["pair"].(string)
+			arr := strings.Split(pair, "/")
+
+			tags := map[string]string{
+				"exchange":    funding_rate["exchange"].(string),
+				"market_type": funding_rate["market_type"].(string),
+				"symbol":      funding_rate["symbol"].(string),
+				"pair":        funding_rate["pair"].(string),
+				"base":        arr[0],
+				"quote":       arr[1],
+			}
+			delete(funding_rate, "exchange")
+			delete(funding_rate, "market_type")
+			delete(funding_rate, "symbol")
+			delete(funding_rate, "pair")
+
+			p := influxdb2.NewPoint("funding_rate",
+				tags,
+				map[string]interface{}{"funding_rate": funding_rate["funding_rate"].(float64)},
+				utils.FromUnixMilli(int64(funding_rate["funding_time"].(float64))),
+			)
+			writeAPI.WritePoint(p)
+
+			if funding_rate["estimated_rate"] != nil {
+				p := influxdb2.NewPoint("estimated_funding_rate",
+					tags,
+					map[string]interface{}{"estimated_rate": funding_rate["estimated_rate"].(float64)},
+					utils.FromUnixMilli(int64(funding_rate["timestamp"].(float64))),
+				)
+				writeAPI.WritePoint(p)
+			}
 		}
 	default:
 		log.Fatalf("Unknown channel %s", msg.Channel)

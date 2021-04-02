@@ -9,7 +9,7 @@ import (
 )
 
 func NewRedisClient(redis_url string) *redis.Client {
-  opt, err := redis.ParseURL(redis_url)
+	opt, err := redis.ParseURL(redis_url)
 	if err != nil {
 		log.Fatalln(err)
 	}
