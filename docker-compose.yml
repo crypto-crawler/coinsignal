@@ -23,8 +23,11 @@ services:
       - "influxdb2_data:/var/lib/influxdb2"
     restart: always
 
-  grafana:
-    image: grafana/grafana:latest
+  coinsignal-frontend:
+    build:
+      context: ./
+      dockerfile: Dockerfile.frontend
+    image: soulmachine/coinsignal:frontend
     ports:
       - 3000:3000
     environment:
@@ -32,27 +35,34 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=passw0rd
     volumes:
       - "grafana_data:/var/lib/grafana"
-      - "./configs/grafana/provisioning:/etc/grafana/provisioning:ro"
     depends_on:
-      - influxdb
+      - coinsignal-backend
     restart: always
 
-  carbonbot:
-    image: soulmachine/carbonbot:debian
+  carbonbot-trade:
+    image: soulmachine/carbonbot:latest
     command: ["pm2-runtime", "start", "pm2.trade.config.js"]
     environment:
       - REDIS_URL=redis://redis:6379
       - DATA_DIR # unset
-      - PARSER=true
     depends_on:
       - redis
     restart: always
 
-  crawlers:
+  carbonbot-misc:
+    image: soulmachine/carbonbot:misc
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - DATA_DIR # unset
+    depends_on:
+      - redis
+    restart: always
+
+  coinsignal-backend:
     build:
       context: ./
-      dockerfile: Dockerfile
-    image: coinsignal:crawlers
+      dockerfile: Dockerfile.backend
+    image: soulmachine/coinsignal:backend
     environment:
       - FULL_NODE_URL # wss://mainnet.infura.io/ws/v3/YOUR-PROJECT-ID
       - CMC_API_KEY
@@ -63,7 +73,8 @@ services:
       - INFLUXDB_ORG=soulmachine
       - INFLUXDB_BUCKET=coinsignal
     depends_on:
-      - carbonbot
+      - carbonbot-trade
+      - carbonbot-misc
       - influxdb
       - redis
     restart: always
