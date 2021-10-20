@@ -31,8 +31,18 @@ services:
     ports:
       - 3000:3000
     environment:
+      - INFLUXDB_URL=http://influxdb:8086
+      - INFLUXDB_TOKEN=my-t0ken
+      - INFLUXDB_ORG=soulmachine
+      - INFLUXDB_BUCKET=coinsignal
+      # for development
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=passw0rd
+      # for production
+      # - GF_SERVER_DOMAIN=coinsignal.org
+      # - GF_AUTH_ANONYMOUS_ENABLED=true
+      # - GF_AUTH_BASIC_ENABLED=false
+      # - GF_AUTH_DISABLE_LOGIN_FORM=true
     volumes:
       - "grafana_data:/var/lib/grafana"
     depends_on:
@@ -52,6 +62,9 @@ services:
   carbonbot-misc:
     image: soulmachine/carbonbot:misc
     environment:
+      - FULL_NODE_URL # wss://mainnet.infura.io/ws/v3/YOUR-PROJECT-ID
+      - CMC_API_KEY
+      - ETHERSCAN_API_KEY
       - REDIS_URL=redis://redis:6379
       - DATA_DIR # unset
     depends_on:
@@ -64,9 +77,6 @@ services:
       dockerfile: Dockerfile.backend
     image: soulmachine/coinsignal:backend
     environment:
-      - FULL_NODE_URL # wss://mainnet.infura.io/ws/v3/YOUR-PROJECT-ID
-      - CMC_API_KEY
-      - ETHERSCAN_API_KEY
       - REDIS_URL=redis://redis:6379
       - INFLUXDB_URL=http://influxdb:8086
       - INFLUXDB_TOKEN=my-t0ken
