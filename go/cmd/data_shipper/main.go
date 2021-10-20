@@ -56,7 +56,7 @@ func main() {
 		config.REDIS_TOPIC_ETH_BLOCK_HEADER,
 		config.REDIS_TOPIC_CANDLESTICK_EXT,
 		config.REDIS_TOPIC_CMC_GLOBAL_METRICS,
-		config.REDIS_TOPIC_FUNDING_RATE,
+		config.REDIS_TOPIC_FUNDING_RATE_PARSED,
 	)
 
 	// Consume messages.
@@ -80,6 +80,7 @@ func handleMessage(msg *redis.Message, writeAPI api.WriteAPI) {
 				AddField("fast", gas_price.Fast).
 				AddField("standard", gas_price.Standard).
 				AddField("slow", gas_price.Slow).
+				AddField("priceUSD", gas_price.Slow).
 				SetTime(utils.FromUnixMilli(gas_price.Timestamp))
 
 			writeAPI.WritePoint(p)
@@ -148,7 +149,7 @@ func handleMessage(msg *redis.Message, writeAPI api.WriteAPI) {
 			}
 
 		}
-	case config.REDIS_TOPIC_FUNDING_RATE:
+	case config.REDIS_TOPIC_FUNDING_RATE_PARSED:
 		{
 			funding_rate := make(map[string]interface{})
 			err := json.Unmarshal([]byte(msg.Payload), &funding_rate)
@@ -175,7 +176,7 @@ func handleMessage(msg *redis.Message, writeAPI api.WriteAPI) {
 			p := influxdb2.NewPoint("funding_rate",
 				tags,
 				funding_rate,
-				utils.FromUnixMilli(int64(funding_rate["timestamp"].(float64))),
+				utils.FromUnixMilli(int64(funding_rate["funding_time"].(float64))),
 			)
 			writeAPI.WritePoint(p)
 		}

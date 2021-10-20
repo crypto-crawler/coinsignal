@@ -1,0 +1,20 @@
+FROM grafana/grafana:latest-ubuntu
+
+# References:
+#
+# - https://github.com/grafana/grafana/blob/main/Dockerfile.ubuntu
+
+COPY --chown=grafana:root ./configs/grafana/provisioning /etc/grafana/provisioning
+COPY ./configs/grafana/fix_influxdb.sh /fix_influxdb.sh
+
+USER root
+
+RUN apt-get -qy update && apt-get -qy --no-install-recommends install \
+    iputils-ping \
+    procps && \
+    echo "Configure Influxdb" && \
+    sed -i '/^exec grafana-server/i /fix_influxdb.sh' /run.sh && \
+    apt-get -qy autoremove && apt-get clean && rm -rf /var/lib/apt/lists/* && rm -rf /tmp/*
+
+USER grafana
+ENV USER=grafana

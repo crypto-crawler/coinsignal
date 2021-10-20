@@ -234,10 +234,10 @@ impl Candlestick {
             }
         }
 
-        let volume_delta = trade.quantity;
-        let volume_quote_delta = trade.volume;
-        let volume_usd_delta = trade.volume * quote_price;
-        let volume_btc_delta = trade.volume * quote_price / btc_price;
+        let volume_delta = trade.quantity_base;
+        let volume_quote_delta = trade.quantity_quote;
+        let volume_usd_delta = trade.quantity_base * quote_price;
+        let volume_btc_delta = trade.quantity_base * quote_price / btc_price;
 
         self.volume += volume_delta;
         self.volume_quote += volume_quote_delta;
@@ -275,15 +275,15 @@ impl Candlestick {
         trade.timestamp.hash(&mut s);
         trade.trade_id.hash(&mut s);
         trade.price.to_string().hash(&mut s);
-        trade.quantity.to_string().hash(&mut s);
-        trade.volume.to_string().hash(&mut s);
+        trade.quantity_base.to_string().hash(&mut s);
+        trade.quantity_quote.to_string().hash(&mut s);
         trade.side.to_string().hash(&mut s);
 
         s.finish()
     }
 }
 
-const INTERVAL: i64 = 300000; // 5 minutes in milliseconds
+const INTERVAL: i64 = 60000; // 1 minutes in milliseconds
 
 // Merge trades into 1-minute klines
 fn main() {
@@ -309,7 +309,7 @@ fn main() {
         client.get_connection().unwrap()
     };
     let mut pubsub = connection.as_pubsub();
-    pubsub.subscribe(REDIS_TOPIC_TRADE).unwrap();
+    pubsub.subscribe(REDIS_TOPIC_TRADE_PARSED).unwrap();
 
     let mut candlesticks: HashMap<String, Candlestick> = HashMap::new();
 

@@ -15,14 +15,16 @@ docker-compose up
 
 Open Grafana at <http://localhost:3000> in browser and login with `admin` and `passw0rd`.
 
+## Build
+
+```bash
+docker build -t soulmachine/coinsignal:frontend . -f Dockerfile.frontend
+docker build -t soulmachine/coinsignal:backend . -f Dockerfile.backend
+docker push soulmachine/coinsignal:frontend && docker push soulmachine/coinsignal:backend
+```
+
 ## Architecture
 
 ![Architecture](./architecture.png)
 
 - I tried to use Kafka as the message queue, but it's too heavy, so I used Redis instead.
-
-## Build
-
-```bash
-docker build -t soulmachine/coinsignal:crawlers .
-```

@@ -1,0 +1,38 @@
+FROM ghcr.io/rust-lang/rust:nightly-bullseye-slim AS rust_builder
+
+RUN mkdir /project
+WORKDIR /project
+
+COPY ./rust/ ./
+RUN apt -qy update && apt -qy install pkg-config libssl-dev \
+    && RUSTFLAGS="-C target-cpu=x86-64-v3" cargo build --release
+
+FROM golang:latest AS go_builder
+
+RUN mkdir /project
+WORKDIR /project
+COPY ./go/ ./
+RUN go build -o data_shipper cmd/data_shipper/main.go
+
+
+FROM node:bullseye-slim
+
+COPY --from=rust_builder /project/target/release/candlestick_builder /usr/local/bin/
+COPY --from=rust_builder /project/target/release/msg_parser /usr/local/bin/
+COPY --from=rust_builder /project/target/release/price_updater /usr/local/bin/
+
+COPY --from=go_builder /project/data_shipper /usr/local/bin/
+
+RUN apt-get -qy update && apt-get -qy --no-install-recommends install \
+    ca-certificates curl \
+    && npm install pm2 -g --production \
+    && apt-get -qy autoremove && apt-get clean && rm -rf /var/lib/apt/lists/* && rm -rf /tmp/*
+
+COPY ./pm2.config.js /root/pm2.config.js
+
+ENV RUST_LOG "warn"
+ENV RUST_BACKTRACE 1
+
+WORKDIR /root
+
+CMD [ "pm2-runtime", "start", "pm2.config.js" ]
