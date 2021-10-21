@@ -1,3 +1,5 @@
+use std::{sync::mpsc::Receiver, thread::JoinHandle};
+
 use crypto_msg_parser::{FundingRateMsg, MarketType, MessageType, TradeMsg};
 use log::*;
 use serde::{Deserialize, Serialize};
@@ -22,6 +24,49 @@ pub struct Message {
     pub json: String,
 }
 
+fn create_parser_thread(rx: Receiver<Message>, redis_url: String) -> JoinHandle<()> {
+    std::thread::Builder::new()
+        .name("parser".to_string())
+        .spawn(move || {
+            let mut publisher = Publisher::new(&redis_url);
+            for raw_msg in rx {
+                match raw_msg.msg_type {
+                    MessageType::Trade => {
+                        let trade_msgs = if let Ok(tmp) = crypto_msg_parser::parse_trade(
+                            &raw_msg.exchange,
+                            raw_msg.market_type,
+                            &raw_msg.json,
+                        ) {
+                            tmp
+                        } else {
+                            vec![]
+                        };
+                        for trade_msg in trade_msgs {
+                            publisher.publish::<TradeMsg>(REDIS_TOPIC_TRADE_PARSED, &trade_msg);
+                        }
+                    }
+                    MessageType::FundingRate => {
+                        let rates = if let Ok(tmp) = crypto_msg_parser::parse_funding_rate(
+                            &raw_msg.exchange,
+                            raw_msg.market_type,
+                            &raw_msg.json,
+                        ) {
+                            tmp
+                        } else {
+                            vec![]
+                        };
+                        for rate in rates {
+                            publisher
+                                .publish::<FundingRateMsg>(REDIS_TOPIC_FUNDING_RATE_PARSED, &rate);
+                        }
+                    }
+                    _ => panic!("unexpected message type"),
+                };
+            }
+        })
+        .unwrap()
+}
+
 fn main() {
     env_logger::init();
     let redis_url = if std::env::var("REDIS_URL").is_err() {
@@ -35,8 +80,6 @@ fn main() {
     };
     wait_redis(redis_url);
 
-    let mut publisher = Publisher::new(redis_url);
-
     // subscriber
     let mut connection = {
         let client = redis::Client::open(redis_url).unwrap();
@@ -46,45 +89,12 @@ fn main() {
     pubsub.subscribe(REDIS_TOPIC_TRADE).unwrap();
     pubsub.subscribe(REDIS_TOPIC_FUNDING_RATE).unwrap();
 
+    let (tx, rx) = std::sync::mpsc::channel::<Message>();
+    let _ = create_parser_thread(rx, redis_url.to_string());
     loop {
-        let ret = pubsub.get_message();
-        if ret.is_err() {
-            warn!("{}", ret.err().unwrap());
-            continue;
-        }
-        let msg = ret.unwrap();
+        let msg = pubsub.get_message().unwrap();
         let payload: String = msg.get_payload().unwrap();
         let raw_msg = serde_json::from_str::<Message>(&payload).unwrap();
-        match raw_msg.msg_type {
-            MessageType::Trade => {
-                let trade_msgs = if let Ok(tmp) = crypto_msg_parser::parse_trade(
-                    &raw_msg.exchange,
-                    raw_msg.market_type,
-                    &raw_msg.json,
-                ) {
-                    tmp
-                } else {
-                    vec![]
-                };
-                for trade_msg in trade_msgs {
-                    publisher.publish::<TradeMsg>(REDIS_TOPIC_TRADE_PARSED, &trade_msg);
-                }
-            }
-            MessageType::FundingRate => {
-                let rates = if let Ok(tmp) = crypto_msg_parser::parse_funding_rate(
-                    &raw_msg.exchange,
-                    raw_msg.market_type,
-                    &raw_msg.json,
-                ) {
-                    tmp
-                } else {
-                    vec![]
-                };
-                for rate in rates {
-                    publisher.publish::<FundingRateMsg>(REDIS_TOPIC_FUNDING_RATE_PARSED, &rate);
-                }
-            }
-            _ => panic!("unexpected message type"),
-        };
+        tx.send(raw_msg).unwrap();
     }
 }
