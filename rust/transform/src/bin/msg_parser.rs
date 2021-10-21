@@ -39,6 +39,7 @@ fn create_parser_thread(rx: Receiver<Message>, redis_url: String) -> JoinHandle<
                         ) {
                             tmp
                         } else {
+                            warn!("{}", serde_json::to_string(&raw_msg).unwrap());
                             vec![]
                         };
                         for trade_msg in trade_msgs {
@@ -53,6 +54,7 @@ fn create_parser_thread(rx: Receiver<Message>, redis_url: String) -> JoinHandle<
                         ) {
                             tmp
                         } else {
+                            warn!("{}", serde_json::to_string(&raw_msg).unwrap());
                             vec![]
                         };
                         for rate in rates {
@@ -60,7 +62,7 @@ fn create_parser_thread(rx: Receiver<Message>, redis_url: String) -> JoinHandle<
                                 .publish::<FundingRateMsg>(REDIS_TOPIC_FUNDING_RATE_PARSED, &rate);
                         }
                     }
-                    _ => panic!("unexpected message type"),
+                    _ => panic!("unexpected message type {}", raw_msg.msg_type),
                 };
             }
         })
