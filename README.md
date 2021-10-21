@@ -8,7 +8,7 @@ If you want to run this project locally, please read on.
 
 ## Quickstart
 
-First, create a file named `.env` to store your API keys,
+First, apply some API keys and save them to a file named `.env`:
 
 ```ini
 ETHERSCAN_API_KEY="your etherscan.io API key"
@@ -22,9 +22,9 @@ Second, run coinsignal,
 docker-compose --env-file .envrc up
 ```
 
-Third, open <http://localhost:3000> in browser and login with `admin` and `passw0rd`.
+Open <http://localhost:3000> in browser and login with `admin` and `passw0rd`, enjoy!
 
-Additionally, open Influxdb at <http://localhost:8086>
+Additionally, you can open influxdb at <http://localhost:8086>
 
 ## Build
 
