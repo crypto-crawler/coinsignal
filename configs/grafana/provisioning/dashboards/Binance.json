@@ -15,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 2,
+  "id": 5,
   "links": [],
   "panels": [
     {
@@ -80,7 +80,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "from(bucket: \"coinsignal\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"eth_block_header\")\n  |> filter(fn: (r) => r[\"_field\"] == \"reward\")\n  |> aggregateWindow(every: 15m, fn: sum, createEmpty: false)\n  |> yield(name: \"reward\")",
+          "query": "from(bucket: \"coinsignal\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"funding_rate\")\n  |> filter(fn: (r) => r[\"_field\"] == \"funding_rate\")\n  |> filter(fn: (r) => r[\"exchange\"] == \"binance\")\n  |> filter(fn: (r) => r[\"market_type\"] == \"linear_swap\" or r[\"market_type\"] == \"inverse_swap\")\n  |> group(columns: [\"_measurement\", \"_field\", \"market_type\", \"symbol\"])\n  |> aggregateWindow(every: 15m, fn: mean, createEmpty: true)\n  |> yield(name: \"mean\")",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -104,7 +104,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "ETH Miner Reward(Every 15 minutes)",
+      "title": "Funding Rate per Pair",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -203,7 +203,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "from(bucket: \"coinsignal\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"eth_block_header\")\n  |> filter(fn: (r) => r[\"_field\"] == \"reward_usd\")\n  |> aggregateWindow(every: 15m, fn: sum, createEmpty: false)\n  |> yield(name: \"reward_usd\")",
+          "query": "from(bucket: \"coinsignal\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"funding_rate\")\n  |> filter(fn: (r) => r[\"_field\"] == \"funding_rate\")\n  |> filter(fn: (r) => r[\"exchange\"] == \"binance\")\n  |> filter(fn: (r) => r[\"market_type\"] == \"linear_swap\" or r[\"market_type\"] == \"inverse_swap\")\n  |> group(columns: [\"_measurement\", \"_field\", \"base\"])\n  |> aggregateWindow(every: 15m, fn: mean, createEmpty: true)\n  |> yield(name: \"mean\")",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -227,7 +227,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "ETH Miner Reward in USD(Every 15 minutes)",
+      "title": "Funding Rate per Coin",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -270,7 +270,6 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": null,
-      "description": "Gas Price from gasnow.org",
       "fieldConfig": {
         "defaults": {},
         "overrides": []
@@ -327,7 +326,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "from(bucket: \"coinsignal\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"eth_gas_price\")\n  |> aggregateWindow(every: 5m, fn: mean, createEmpty: false)\n  |> yield(name: \"mean\")",
+          "query": "from(bucket: \"coinsignal\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"candlestick_ext\")\n  |> filter(fn: (r) => r[\"bar_size\"] == \"300000\")\n  |> filter(fn: (r) => r[\"base\"] != \"BTC\")\n  |> filter(fn: (r) => r[\"exchange\"] != \"binance\")\n  |> filter(fn: (r) => r[\"_field\"] == \"volume_usd\")\n  |> group(columns: [\"_measurement\", \"_field\", \"base\"])\n  |> aggregateWindow(every: 15m, fn: sum, createEmpty: false)\n",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -351,7 +350,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Gas Price(Every 5 minutes)",
+      "title": "Trading Volume per Coin",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -401,7 +400,7 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Ethereum",
-  "uid": "3Mk4VZlMk",
-  "version": 1
+  "title": "Binance",
+  "uid": "AypGS5lGk",
+  "version": 2
 }

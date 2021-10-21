@@ -15,6 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
+  "id": 1,
   "links": [],
   "panels": [
     {
@@ -31,13 +32,13 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 8,
+        "h": 9,
         "w": 8,
         "x": 0,
         "y": 0
       },
       "hiddenSeries": false,
-      "id": 14,
+      "id": 2,
       "legend": {
         "avg": false,
         "current": false,
@@ -54,7 +55,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.5.0",
+      "pluginVersion": "7.5.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -67,7 +68,7 @@
           "groupBy": [
             {
               "params": [
-                "5m"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -78,16 +79,16 @@
               "type": "fill"
             }
           ],
-          "measurement": "cmc_global_metrics",
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "from(bucket: \"coinsignal\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"cmc_global_metrics\")\n  |> filter(fn: (r) => r[\"_field\"] == \"total_market_cap\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"total_market_cap\")",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
             [
               {
                 "params": [
-                  "total_market_cap"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -147,6 +148,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": null,
+      "description": "",
       "fieldConfig": {
         "defaults": {},
         "overrides": []
@@ -154,13 +156,13 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 8,
+        "h": 9,
         "w": 8,
         "x": 8,
         "y": 0
       },
       "hiddenSeries": false,
-      "id": 18,
+      "id": 3,
       "legend": {
         "avg": false,
         "current": false,
@@ -177,7 +179,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.5.0",
+      "pluginVersion": "7.5.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -190,7 +192,7 @@
           "groupBy": [
             {
               "params": [
-                "5m"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -201,16 +203,16 @@
               "type": "fill"
             }
           ],
-          "measurement": "cmc_global_metrics",
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "from(bucket: \"coinsignal\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"cmc_global_metrics\")\n  |> filter(fn: (r) => r[\"_field\"] == \"altcoin_market_cap\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"altcoin_market_cap\")",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
             [
               {
                 "params": [
-                  "altcoin_market_cap"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -278,13 +280,13 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 8,
+        "h": 9,
         "w": 8,
         "x": 16,
         "y": 0
       },
       "hiddenSeries": false,
-      "id": 10,
+      "id": 4,
       "legend": {
         "avg": false,
         "current": false,
@@ -301,7 +303,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.5.0",
+      "pluginVersion": "7.5.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -314,7 +316,7 @@
           "groupBy": [
             {
               "params": [
-                "5m"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -325,16 +327,16 @@
               "type": "fill"
             }
           ],
-          "measurement": "cmc_global_metrics",
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "from(bucket: \"coinsignal\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"cmc_global_metrics\")\n  |> filter(fn: (r) => r[\"_field\"] == \"btc_dominance\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"btc_dominance\")",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
             [
               {
                 "params": [
-                  "btc_dominance"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -394,6 +396,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": null,
+      "description": "",
       "fieldConfig": {
         "defaults": {},
         "overrides": []
@@ -401,13 +404,13 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 8,
+        "h": 9,
         "w": 8,
         "x": 0,
-        "y": 8
+        "y": 9
       },
       "hiddenSeries": false,
-      "id": 16,
+      "id": 5,
       "legend": {
         "avg": false,
         "current": false,
@@ -424,7 +427,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.5.0",
+      "pluginVersion": "7.5.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -437,7 +440,7 @@
           "groupBy": [
             {
               "params": [
-                "5m"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -448,16 +451,16 @@
               "type": "fill"
             }
           ],
-          "measurement": "cmc_global_metrics",
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "from(bucket: \"coinsignal\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"cmc_global_metrics\")\n  |> filter(fn: (r) => r[\"_field\"] == \"total_volume_24h\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"total_volume_24h\")",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
             [
               {
                 "params": [
-                  "total_volume_24h"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -517,6 +520,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": null,
+      "description": "",
       "fieldConfig": {
         "defaults": {},
         "overrides": []
@@ -524,13 +528,13 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 8,
+        "h": 9,
         "w": 8,
         "x": 8,
-        "y": 8
+        "y": 9
       },
       "hiddenSeries": false,
-      "id": 20,
+      "id": 8,
       "legend": {
         "avg": false,
         "current": false,
@@ -547,7 +551,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.5.0",
+      "pluginVersion": "7.5.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -560,7 +564,7 @@
           "groupBy": [
             {
               "params": [
-                "5m"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -571,16 +575,16 @@
               "type": "fill"
             }
           ],
-          "measurement": "cmc_global_metrics",
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "from(bucket: \"coinsignal\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"cmc_global_metrics\")\n  |> filter(fn: (r) => r[\"_field\"] == \"total_volume_24h\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"total_volume_24h\")",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
             [
               {
                 "params": [
-                  "altcoin_volume_24h"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -597,7 +601,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "24h Trading Volume(Excluding Bitcoin)",
+      "title": "24h Trading Volume",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -640,6 +644,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": null,
+      "description": "",
       "fieldConfig": {
         "defaults": {},
         "overrides": []
@@ -647,13 +652,13 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 8,
+        "h": 9,
         "w": 8,
         "x": 16,
-        "y": 8
+        "y": 9
       },
       "hiddenSeries": false,
-      "id": 12,
+      "id": 7,
       "legend": {
         "avg": false,
         "current": false,
@@ -670,7 +675,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.5.0",
+      "pluginVersion": "7.5.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -683,7 +688,7 @@
           "groupBy": [
             {
               "params": [
-                "5m"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -694,16 +699,16 @@
               "type": "fill"
             }
           ],
-          "measurement": "cmc_global_metrics",
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "from(bucket: \"coinsignal\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"cmc_global_metrics\")\n  |> filter(fn: (r) => r[\"_field\"] == \"eth_dominance\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"eth_dominance\")",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
             [
               {
                 "params": [
-                  "eth_dominance"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -771,154 +776,10 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 8,
+        "h": 9,
         "w": 8,
         "x": 0,
-        "y": 16
-      },
-      "hiddenSeries": false,
-      "id": 8,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.5.0",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "groupBy": [
-            {
-              "params": [
-                "5m"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "0"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "candlestick_ext",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT sum(\"volume_usd_buy\") - sum(\"volume_usd_sell\") FROM \"candlestick_ext\" WHERE (\"bar_size\" = '60000') AND $timeFilter GROUP BY time(5m) fill(0)",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "volume_usd_buy"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "sum"
-              }
-            ],
-            [
-              {
-                "params": [
-                  "volume_usd_sell"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "sum"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "bar_size",
-              "operator": "=",
-              "value": "60000"
-            }
-          ]
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Buy - Sell Volume",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "description": "(buy-sell)/total",
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 8,
-        "y": 16
+        "y": 18
       },
       "hiddenSeries": false,
       "id": 6,
@@ -938,139 +799,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.5.0",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "groupBy": [
-            {
-              "params": [
-                "5m"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "0"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "candlestick_ext",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT (sum(\"volume_usd_buy\")-sum(\"volume_usd_sell\"))/sum(\"volume_usd\") FROM \"candlestick_ext\" WHERE (\"bar_size\" = '60000') AND $timeFilter GROUP BY time(5m) fill(0)",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "volume_buy"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "sum"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "bar_size",
-              "operator": "=",
-              "value": "60000"
-            }
-          ]
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "VPIN",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "description": "(buy-sell)/total",
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 16,
-        "y": 16
-      },
-      "hiddenSeries": false,
-      "id": 4,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.5.0",
+      "pluginVersion": "7.5.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1096,8 +825,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT (sum(\"volume_usd_buy\")-sum(\"volume_usd_sell\"))/sum(\"volume_usd\") FROM \"candlestick_ext\" WHERE (\"bar_size\" = '60000') AND $timeFilter GROUP BY time(5m), \"pair\" fill(0)",
-          "rawQuery": true,
+          "query": "from(bucket: \"coinsignal\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"cmc_global_metrics\")\n  |> filter(fn: (r) => r[\"_field\"] == \"defi_market_cap\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"defi_market_cap\")",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -1105,129 +833,6 @@
               {
                 "params": [
                   "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "VPIN per Pair",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 0,
-        "y": 24
-      },
-      "hiddenSeries": false,
-      "id": 24,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.5.0",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "groupBy": [
-            {
-              "params": [
-                "5m"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "cmc_global_metrics",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "defi_market_cap"
                 ],
                 "type": "field"
               },
@@ -1287,6 +892,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": null,
+      "description": "",
       "fieldConfig": {
         "defaults": {},
         "overrides": []
@@ -1294,13 +900,13 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 8,
+        "h": 9,
         "w": 8,
         "x": 8,
-        "y": 24
+        "y": 18
       },
       "hiddenSeries": false,
-      "id": 22,
+      "id": 9,
       "legend": {
         "avg": false,
         "current": false,
@@ -1317,7 +923,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.5.0",
+      "pluginVersion": "7.5.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1330,7 +936,7 @@
           "groupBy": [
             {
               "params": [
-                "5m"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -1341,16 +947,16 @@
               "type": "fill"
             }
           ],
-          "measurement": "cmc_global_metrics",
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "from(bucket: \"coinsignal\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"cmc_global_metrics\")\n  |> filter(fn: (r) => r[\"_field\"] == \"defi_volume_24h\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"defi_volume_24h\")",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
             [
               {
                 "params": [
-                  "defi_volume_24h"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -1410,6 +1016,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": null,
+      "description": "",
       "fieldConfig": {
         "defaults": {},
         "overrides": []
@@ -1417,13 +1024,13 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 8,
+        "h": 9,
         "w": 8,
         "x": 16,
-        "y": 24
+        "y": 18
       },
       "hiddenSeries": false,
-      "id": 26,
+      "id": 10,
       "legend": {
         "avg": false,
         "current": false,
@@ -1440,7 +1047,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.5.0",
+      "pluginVersion": "7.5.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1453,7 +1060,7 @@
           "groupBy": [
             {
               "params": [
-                "5m"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -1464,16 +1071,16 @@
               "type": "fill"
             }
           ],
-          "measurement": "cmc_global_metrics",
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "from(bucket: \"coinsignal\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"cmc_global_metrics\")\n  |> filter(fn: (r) => r[\"_field\"] == \"defi_24h_percentage_change\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"defi_24h_percentage_change\")",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
             [
               {
                 "params": [
-                  "defi_24h_percentage_change"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -1533,6 +1140,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": null,
+      "description": "",
       "fieldConfig": {
         "defaults": {},
         "overrides": []
@@ -1540,13 +1148,13 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 8,
+        "h": 9,
         "w": 8,
         "x": 0,
-        "y": 32
+        "y": 27
       },
       "hiddenSeries": false,
-      "id": 34,
+      "id": 11,
       "legend": {
         "avg": false,
         "current": false,
@@ -1563,7 +1171,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.5.0",
+      "pluginVersion": "7.5.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1576,7 +1184,7 @@
           "groupBy": [
             {
               "params": [
-                "5m"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -1587,16 +1195,16 @@
               "type": "fill"
             }
           ],
-          "measurement": "cmc_global_metrics",
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "from(bucket: \"coinsignal\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"cmc_global_metrics\")\n  |> filter(fn: (r) => r[\"_field\"] == \"stablecoin_market_cap\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"stablecoin_market_cap\")",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
             [
               {
                 "params": [
-                  "stablecoin_market_cap"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -1656,6 +1264,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": null,
+      "description": "",
       "fieldConfig": {
         "defaults": {},
         "overrides": []
@@ -1663,13 +1272,13 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 8,
+        "h": 9,
         "w": 8,
         "x": 8,
-        "y": 32
+        "y": 27
       },
       "hiddenSeries": false,
-      "id": 32,
+      "id": 14,
       "legend": {
         "avg": false,
         "current": false,
@@ -1686,7 +1295,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.5.0",
+      "pluginVersion": "7.5.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1699,7 +1308,7 @@
           "groupBy": [
             {
               "params": [
-                "5m"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -1710,16 +1319,16 @@
               "type": "fill"
             }
           ],
-          "measurement": "cmc_global_metrics",
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "from(bucket: \"coinsignal\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"cmc_global_metrics\")\n  |> filter(fn: (r) => r[\"_field\"] == \"stablecoin_market_cap\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"stablecoin_market_cap\")",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
             [
               {
                 "params": [
-                  "stablecoin_volume_24h"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -1736,7 +1345,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Stablecoin 24h Volume",
+      "title": "Stablecoin Market Capitalization",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1779,6 +1388,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": null,
+      "description": "",
       "fieldConfig": {
         "defaults": {},
         "overrides": []
@@ -1786,13 +1396,13 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 8,
+        "h": 9,
         "w": 8,
         "x": 16,
-        "y": 32
+        "y": 27
       },
       "hiddenSeries": false,
-      "id": 36,
+      "id": 13,
       "legend": {
         "avg": false,
         "current": false,
@@ -1809,7 +1419,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.5.0",
+      "pluginVersion": "7.5.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1822,7 +1432,7 @@
           "groupBy": [
             {
               "params": [
-                "5m"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -1833,16 +1443,16 @@
               "type": "fill"
             }
           ],
-          "measurement": "cmc_global_metrics",
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "from(bucket: \"coinsignal\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"cmc_global_metrics\")\n  |> filter(fn: (r) => r[\"_field\"] == \"stablecoin_24h_percentage_change\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"stablecoin_24h_percentage_change\")",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
             [
               {
                 "params": [
-                  "stablecoin_24h_percentage_change"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -1902,6 +1512,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": null,
+      "description": "",
       "fieldConfig": {
         "defaults": {},
         "overrides": []
@@ -1909,13 +1520,13 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 8,
+        "h": 9,
         "w": 8,
         "x": 0,
-        "y": 40
+        "y": 36
       },
       "hiddenSeries": false,
-      "id": 30,
+      "id": 12,
       "legend": {
         "avg": false,
         "current": false,
@@ -1932,7 +1543,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.5.0",
+      "pluginVersion": "7.5.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1945,7 +1556,7 @@
           "groupBy": [
             {
               "params": [
-                "5m"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -1956,16 +1567,16 @@
               "type": "fill"
             }
           ],
-          "measurement": "cmc_global_metrics",
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "from(bucket: \"coinsignal\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"cmc_global_metrics\")\n  |> filter(fn: (r) => r[\"_field\"] == \"defi_market_cap\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"defi_market_cap\")",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
             [
               {
                 "params": [
-                  "derivatives_24h_percentage_change"
+                  "value"
                 ],
                 "type": "field"
               },
@@ -1982,7 +1593,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Derivatives 24h Percentage Change",
+      "title": "DeFi Market Capitalization",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -2025,6 +1636,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": null,
+      "description": "",
       "fieldConfig": {
         "defaults": {},
         "overrides": []
@@ -2032,13 +1644,13 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 8,
+        "h": 9,
         "w": 8,
         "x": 8,
-        "y": 40
+        "y": 36
       },
       "hiddenSeries": false,
-      "id": 28,
+      "id": 17,
       "legend": {
         "avg": false,
         "current": false,
@@ -2055,7 +1667,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.5.0",
+      "pluginVersion": "7.5.1",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -2068,7 +1680,7 @@
           "groupBy": [
             {
               "params": [
-                "5m"
+                "$__interval"
               ],
               "type": "time"
             },
@@ -2079,16 +1691,264 @@
               "type": "fill"
             }
           ],
-          "measurement": "cmc_global_metrics",
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "from(bucket: \"coinsignal\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"cmc_global_metrics\")\n  |> filter(fn: (r) => r[\"_field\"] == \"defi_market_cap\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"defi_market_cap\")",
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
             [
               {
                 "params": [
-                  "derivatives_volume_24h"
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "DeFi Market Capitalization",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": null,
+      "description": "",
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 16,
+        "y": 36
+      },
+      "hiddenSeries": false,
+      "id": 16,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.5.1",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "from(bucket: \"coinsignal\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"cmc_global_metrics\")\n  |> filter(fn: (r) => r[\"_field\"] == \"derivatives_24h_percentage_change\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"derivatives_24h_percentage_change\")",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "DeFi 24h Percentage Change",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": null,
+      "description": "",
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 0,
+        "y": 45
+      },
+      "hiddenSeries": false,
+      "id": 15,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.5.1",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "from(bucket: \"coinsignal\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"cmc_global_metrics\")\n  |> filter(fn: (r) => r[\"_field\"] == \"derivatives_volume_24h\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"derivatives_volume_24h\")",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
                 ],
                 "type": "field"
               },
@@ -2141,9 +2001,132 @@
         "align": false,
         "alignLevel": null
       }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": null,
+      "description": "",
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 8,
+        "y": 45
+      },
+      "hiddenSeries": false,
+      "id": 18,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.5.1",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "from(bucket: \"coinsignal\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"cmc_global_metrics\")\n  |> filter(fn: (r) => r[\"_field\"] == \"derivatives_24h_percentage_change\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"derivatives_24h_percentage_change\")",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Derivatives 24h Percentage Change",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
     }
   ],
-  "refresh": "30s",
   "schemaVersion": 27,
   "style": "dark",
   "tags": [],
@@ -2151,25 +2134,12 @@
     "list": []
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-6h",
     "to": "now"
   },
-  "timepicker": {
-    "refresh_intervals": [
-      "5s",
-      "10s",
-      "30s",
-      "1m",
-      "5m",
-      "15m",
-      "30m",
-      "1h",
-      "2h",
-      "1d"
-    ]
-  },
+  "timepicker": {},
   "timezone": "",
-  "title": "Global",
-  "uid": "TtvQS_vMz",
-  "version": 1
+  "title": "CoinMarketCap",
+  "uid": "yjLXMW_Mz",
+  "version": 4
 }

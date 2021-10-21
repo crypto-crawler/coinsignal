@@ -69,12 +69,12 @@ docker run -d --name coinsignal-backend --restart always -e INFLUXDB_URL=http://
 ### 4. Frontend
 
 ```bash
-docker run -d --name coinsignal-frontend --restart always -e INFLUXDB_URL=http://ip:8086 -e INFLUXDB_ORG=ORG_NAME -e INFLUXDB_BUCKET=BUCKET_NAME -e INFLUXDB_TOKEN=YOUR_TOKEN -e GF_SERVER_DOMAIN=crypto-indicators.org -e GF_AUTH_ANONYMOUS_ENABLED=true -e GF_AUTH_BASIC_ENABLED=false -e GF_AUTH_DISABLE_LOGIN_FORM=true -p 80:3000 soulmachine/coinsignal:frontend
+docker run -d --name coinsignal-frontend --restart always -e INFLUXDB_URL=http://ip:8086 -e INFLUXDB_ORG=ORG_NAME -e INFLUXDB_BUCKET=BUCKET_NAME -e INFLUXDB_TOKEN=YOUR_TOKEN -e GF_SERVER_DOMAIN=coinsignal.org -e GF_AUTH_ANONYMOUS_ENABLED=true -e GF_AUTH_BASIC_ENABLED=false -e GF_AUTH_DISABLE_LOGIN_FORM=true -p 80:3000 soulmachine/coinsignal:frontend
 ```
 
 The differences between dev and prod are:
 
-- `-e GF_SECURITY_ADMIN_USER=admin -e GF_SECURITY_ADMIN_PASSWORD=YOUR_PASSWORD` vs. `-e GF_SERVER_DOMAIN=crypto-indicators.org -e GF_AUTH_ANONYMOUS_ENABLED=true -e GF_AUTH_BASIC_ENABLED=false -e GF_AUTH_DISABLE_LOGIN_FORM=true`
+- `-e GF_SECURITY_ADMIN_USER=admin -e GF_SECURITY_ADMIN_PASSWORD=YOUR_PASSWORD` vs. `-e GF_SERVER_DOMAIN=coinsignal.org -e GF_AUTH_ANONYMOUS_ENABLED=true -e GF_AUTH_BASIC_ENABLED=false -e GF_AUTH_DISABLE_LOGIN_FORM=true`
 - `-p 3000:3000` vs. `-p 80:3000`
 
 You can run two frontend containers in parallel, one for development and one for production.
