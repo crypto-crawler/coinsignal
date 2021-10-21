@@ -63,24 +63,28 @@ impl PriceUpdater {
             pubsub.subscribe(REDIS_TOPIC_TRADE_PARSED).unwrap();
 
             loop {
-                let msg = pubsub.get_message().unwrap();
-                let payload: String = msg.get_payload().unwrap();
-                let trade_msg = serde_json::from_str::<TradeMsg>(&payload).unwrap();
-                match trade_msg.market_type {
-                    MarketType::Spot | MarketType::InverseSwap | MarketType::LinearSwap => {
-                        let v: Vec<&str> = trade_msg.pair.split('/').collect();
-                        let base = v[0];
-                        let quote = v[1];
-                        if quote == "USD" || quote == "USDT" {
-                            Self::update_price(
-                                base,
-                                trade_msg.price,
-                                prices_clone.clone(),
-                                conn_clone.clone(),
-                            )
+                match pubsub.get_message() {
+                    Ok(msg) => {
+                        let payload: String = msg.get_payload().unwrap();
+                        let trade_msg = serde_json::from_str::<TradeMsg>(&payload).unwrap();
+                        match trade_msg.market_type {
+                            MarketType::Spot | MarketType::InverseSwap | MarketType::LinearSwap => {
+                                let v: Vec<&str> = trade_msg.pair.split('/').collect();
+                                let base = v[0];
+                                let quote = v[1];
+                                if quote == "USD" || quote == "USDT" {
+                                    Self::update_price(
+                                        base,
+                                        trade_msg.price,
+                                        prices_clone.clone(),
+                                        conn_clone.clone(),
+                                    )
+                                }
+                            }
+                            _ => (),
                         }
                     }
-                    _ => (),
+                    Err(err) => error!("{}", err),
                 }
             }
         })

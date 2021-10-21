@@ -323,10 +323,21 @@ fn main() {
 
     loop {
         let trade_msg = {
-            let msg = pubsub.get_message().unwrap();
-            let payload: String = msg.get_payload().unwrap();
-            serde_json::from_str::<TradeMsg>(&payload).unwrap()
+            match pubsub.get_message() {
+                Ok(msg) => {
+                    let payload: String = msg.get_payload().unwrap();
+                    Some(serde_json::from_str::<TradeMsg>(&payload).unwrap())
+                }
+                Err(err) => {
+                    error!("{}", err);
+                    None
+                }
+            }
         };
+        if trade_msg.is_none() {
+            continue;
+        }
+        let trade_msg = trade_msg.unwrap();
         if !is_good(extract_quote(&trade_msg.pair)) {
             // warn!(
             //     "{}, {}, {}",
