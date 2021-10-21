@@ -1,7 +1,4 @@
-use std::{
-    sync::mpsc::{Receiver, Sender},
-    thread::JoinHandle,
-};
+use std::{sync::mpsc::Receiver, thread::JoinHandle};
 
 use crypto_msg_parser::{FundingRateMsg, MarketType, MessageType, TradeMsg};
 use log::*;
@@ -11,7 +8,6 @@ use utils::{pubsub::Publisher, wait_redis};
 
 const REDIS_TOPIC_TRADE: &str = "carbonbot:trade";
 const REDIS_TOPIC_FUNDING_RATE: &str = "carbonbot:funding_rate";
-const NUM_PARSER_THREADS: usize = 4;
 
 /// Message represents messages received by crawlers.
 #[derive(Serialize, Deserialize)]
@@ -102,21 +98,14 @@ fn main() {
     pubsub.subscribe(REDIS_TOPIC_TRADE).unwrap();
     pubsub.subscribe(REDIS_TOPIC_FUNDING_RATE).unwrap();
 
-    let senders = (0..NUM_PARSER_THREADS)
-        .map(|i| {
-            let (tx, rx) = std::sync::mpsc::channel::<Message>();
-            let _ = create_parser_thread(format!("parser-{}", i), rx, redis_url.to_string());
-            tx
-        })
-        .collect::<Vec<Sender<Message>>>();
-    let mut index: usize = 0;
+    let (tx, rx) = std::sync::mpsc::channel::<Message>();
+    let _ = create_parser_thread("parser".to_string(), rx, redis_url.to_string());
     loop {
         match pubsub.get_message() {
             Ok(msg) => {
                 let payload: String = msg.get_payload().unwrap();
                 let raw_msg = serde_json::from_str::<Message>(&payload).unwrap();
-                senders[index].send(raw_msg).unwrap();
-                index = (index + 1) % NUM_PARSER_THREADS;
+                tx.send(raw_msg).unwrap();
             }
             Err(err) => error!("{}", err),
         }
