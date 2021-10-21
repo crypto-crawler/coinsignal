@@ -118,7 +118,7 @@ fn main() {
                 senders[index].send(raw_msg).unwrap();
                 index = (index + 1) % NUM_PARSER_THREADS;
             }
-            Err(err) => error!("line 106 {}", err),
+            Err(err) => error!("{}", err),
         }
     }
 }
