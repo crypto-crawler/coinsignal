@@ -8,12 +8,23 @@ If you want to run this project locally, please read on.
 
 ## Quickstart
 
-```bash
-# set environment variables FULL_NODE_URL, CMC_API_KEY, ETHERSCAN_API_KEY in your terminal
-docker-compose up
+First, create a file named `.env` to store your API keys,
+
+```ini
+ETHERSCAN_API_KEY="your etherscan.io API key"
+FULL_NODE_URL="wss://mainnet.infura.io/ws/v3/YOUR_PROJECT_ID"
+CMC_API_KEY="your coinmarketcap.com API key"
 ```
 
-Open Grafana at <http://localhost:3000> in browser and login with `admin` and `passw0rd`.
+Second, run coinsignal,
+
+```bash
+docker-compose --env-file .envrc up
+```
+
+Third, open <http://localhost:3000> in browser and login with `admin` and `passw0rd`.
+
+Additionally, open Influxdb at <http://localhost:8086>
 
 ## Build
 

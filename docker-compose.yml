@@ -54,7 +54,6 @@ services:
     command: ["pm2-runtime", "start", "pm2.trade.config.js"]
     environment:
       - REDIS_URL=redis://redis:6379
-      - DATA_DIR # unset
     depends_on:
       - redis
     restart: always
@@ -63,10 +62,9 @@ services:
     image: soulmachine/carbonbot:misc
     environment:
       - FULL_NODE_URL # wss://mainnet.infura.io/ws/v3/YOUR-PROJECT-ID
-      - CMC_API_KEY
-      - ETHERSCAN_API_KEY
+      - CMC_API_KEY # Your coinmarketcap API key
+      - ETHERSCAN_API_KEY # Your etherscan API key
       - REDIS_URL=redis://redis:6379
-      - DATA_DIR # unset
     depends_on:
       - redis
     restart: always
