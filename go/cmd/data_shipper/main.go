@@ -72,15 +72,14 @@ func handleMessage(msg *redis.Message, writeAPI api.WriteAPI) {
 	switch msg.Channel {
 	case config.REDIS_TOPIC_ETH_GAS_PRICE:
 		{
-			gas_price := pojo.GasPrice{}
-			json.Unmarshal([]byte(msg.Payload), &gas_price)
+			gas_price := &pojo.GasPrice{}
+			gas_price.FromGasPriceMsg(msg.Payload)
 
 			p := influxdb2.NewPointWithMeasurement("eth_gas_price").
 				AddField("rapid", gas_price.Rapid).
 				AddField("fast", gas_price.Fast).
 				AddField("standard", gas_price.Standard).
 				AddField("slow", gas_price.Slow).
-				AddField("priceUSD", gas_price.Slow).
 				SetTime(utils.FromUnixMilli(gas_price.Timestamp))
 
 			writeAPI.WritePoint(p)

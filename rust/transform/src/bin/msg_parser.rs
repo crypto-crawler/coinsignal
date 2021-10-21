@@ -1,11 +1,11 @@
 use crypto_msg_parser::{FundingRateMsg, MarketType, MessageType, TradeMsg};
 use log::*;
 use serde::{Deserialize, Serialize};
-use transform::constants::{
-    REDIS_TOPIC_FUNDING_RATE, REDIS_TOPIC_FUNDING_RATE_PARSED, REDIS_TOPIC_TRADE,
-    REDIS_TOPIC_TRADE_PARSED,
-};
+use transform::constants::{REDIS_TOPIC_FUNDING_RATE_PARSED, REDIS_TOPIC_TRADE_PARSED};
 use utils::{pubsub::Publisher, wait_redis};
+
+const REDIS_TOPIC_TRADE: &str = "carbonbot:trade";
+const REDIS_TOPIC_FUNDING_RATE: &str = "carbonbot:funding_rate";
 
 /// Message represents messages received by crawlers.
 #[derive(Serialize, Deserialize)]

@@ -96,7 +96,7 @@ impl Candlestick {
         timestamp: i64, // bar end time
     ) -> Self {
         Candlestick {
-            exchange: exchange,
+            exchange,
             market_type,
             symbol,
             pair,
@@ -283,7 +283,7 @@ impl Candlestick {
     }
 }
 
-const INTERVAL: i64 = 60000; // 1 minutes in milliseconds
+const INTERVAL: i64 = 5 * 60000; // 5 minutes in milliseconds
 
 // Merge trades into 1-minute klines
 fn main() {

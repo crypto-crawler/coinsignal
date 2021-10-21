@@ -13,7 +13,7 @@ impl Subscriber {
         }
     }
 
-    pub fn run<'a>(&mut self) {
+    pub fn run(&mut self) {
         let client = redis::Client::open(self.redis_url.as_str()).unwrap();
         let mut connection = client.get_connection().unwrap();
         let mut pubsub = connection.as_pubsub();

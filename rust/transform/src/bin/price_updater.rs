@@ -7,12 +7,11 @@ use std::{
     sync::{Arc, Mutex},
     thread::{self, JoinHandle},
 };
-use transform::constants::{
-    REDIS_TOPIC_CURRENCY_PRICE, REDIS_TOPIC_CURRENCY_PRICE_CHANNEL, REDIS_TOPIC_TRADE,
-};
+use transform::constants::{REDIS_TOPIC_CURRENCY_PRICE, REDIS_TOPIC_TRADE_PARSED};
 use utils::wait_redis;
 
 const BETA: f64 = 0.9; // Vt=βVt-1 + (1-β)
+const REDIS_TOPIC_CURRENCY_PRICE_CHANNEL: &str = "carbonbot:misc:currency_price_channel";
 
 pub struct PriceUpdater {
     redis_url: String,
@@ -61,28 +60,27 @@ impl PriceUpdater {
             let client = redis::Client::open(redis_url).unwrap();
             let mut connection = client.get_connection().unwrap();
             let mut pubsub = connection.as_pubsub();
-            pubsub.subscribe(REDIS_TOPIC_TRADE).unwrap();
+            pubsub.subscribe(REDIS_TOPIC_TRADE_PARSED).unwrap();
 
             loop {
                 let msg = pubsub.get_message().unwrap();
                 let payload: String = msg.get_payload().unwrap();
-                if let Ok(trade_msg) = serde_json::from_str::<TradeMsg>(&payload) {
-                    match trade_msg.market_type {
-                        MarketType::Spot | MarketType::InverseSwap | MarketType::LinearSwap => {
-                            let v: Vec<&str> = trade_msg.pair.split('/').collect();
-                            let base = v[0];
-                            let quote = v[1];
-                            if quote == "USD" || quote == "USDT" {
-                                Self::update_price(
-                                    base,
-                                    trade_msg.price,
-                                    prices_clone.clone(),
-                                    conn_clone.clone(),
-                                )
-                            }
+                let trade_msg = serde_json::from_str::<TradeMsg>(&payload).unwrap();
+                match trade_msg.market_type {
+                    MarketType::Spot | MarketType::InverseSwap | MarketType::LinearSwap => {
+                        let v: Vec<&str> = trade_msg.pair.split('/').collect();
+                        let base = v[0];
+                        let quote = v[1];
+                        if quote == "USD" || quote == "USDT" {
+                            Self::update_price(
+                                base,
+                                trade_msg.price,
+                                prices_clone.clone(),
+                                conn_clone.clone(),
+                            )
                         }
-                        _ => (),
                     }
+                    _ => (),
                 }
             }
         })

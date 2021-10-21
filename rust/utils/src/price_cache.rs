@@ -8,9 +8,9 @@ use std::{
     time::Duration,
 };
 
-const HOT_CURRENCIES: [&'static str; 14] = [
-    "BTC", "ETH", "BNB", "ADA", "DOT", "XRP", "UNI", "LTC", "THETA", "LINK", "BCH", "XLM", "KLAY",
-    "FIL",
+const HOT_CURRENCIES: [&str; 14] = [
+    "BTC", "ETH", "BNB", "ADA", "XRP", "SOL", "DOT", "DOGE", "LUNA", "UNI", "LTC", "AVAX", "LINK",
+    "BCH",
 ];
 
 pub struct PriceCache {
@@ -49,11 +49,7 @@ impl PriceCache {
     }
 
     pub fn get_price(&self, currency: &str) -> Option<f64> {
-        if let Some(price) = self.prices.lock().unwrap().get(currency) {
-            Some(*price)
-        } else {
-            None
-        }
+        self.prices.lock().unwrap().get(currency).copied()
     }
 
     fn run(&self) {
@@ -83,6 +79,6 @@ impl PriceCache {
                 return false;
             }
         }
-        return true;
+        true
     }
 }
