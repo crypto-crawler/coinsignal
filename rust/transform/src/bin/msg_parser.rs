@@ -39,7 +39,10 @@ fn create_parser_thread(rx: Receiver<Message>, redis_url: String) -> JoinHandle<
                         ) {
                             tmp
                         } else {
-                            warn!("{}", serde_json::to_string(&raw_msg).unwrap());
+                            if raw_msg.exchange != "bitmex" {
+                                // bitmex has index such as .XTZBON, .XBT, etc.
+                                warn!("{}", serde_json::to_string(&raw_msg).unwrap());
+                            }
                             vec![]
                         };
                         for trade_msg in trade_msgs {
