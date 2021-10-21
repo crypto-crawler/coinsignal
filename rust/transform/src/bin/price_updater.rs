@@ -72,7 +72,11 @@ impl PriceUpdater {
                                 let v: Vec<&str> = trade_msg.pair.split('/').collect();
                                 let base = v[0];
                                 let quote = v[1];
-                                if quote == "USD" || quote == "USDT" {
+                                if quote == "USD"
+                                    || quote == "USDT"
+                                    || quote == "USDC"
+                                    || quote == "BUSD"
+                                {
                                     Self::update_price(
                                         base,
                                         trade_msg.price,

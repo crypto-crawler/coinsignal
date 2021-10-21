@@ -12,9 +12,11 @@ use transform::constants::*;
 use utils::{pubsub::Publisher, wait_redis, PriceCache};
 
 lazy_static! {
-    // see https://www.stablecoinswar.com/
+    // https://coinmarketcap.com/view/stablecoin/
+    // https://www.stablecoinswar.com/
     static ref STABLE_COINS: HashSet<&'static str> = vec![
-        "USD", "USDT", "USDC", "BUSD", "DAI", "PAX", "HUSD", "TUSD", "GUSD", "USDK"
+        "USD", "USDT", "USDC", "BUSD", "DAI", "UST", "TUSD", "USDP", "USDN", "HUSD", "FEI", "LUSD",
+        "FRAX", "SUSD", "USDX", "GUSD", "CUSD", "MUSD", "USDK", "OUSD", "MIM", "PAX"
         ].into_iter().collect();
 
     static ref REDIS_URL: &'static str = if std::env::var("REDIS_URL").is_err() {
@@ -201,11 +203,9 @@ impl Candlestick {
             PRICE_CACHE.get_price(quote).unwrap()
         };
 
-        if PRICE_CACHE.get_price("BTC").is_none() {
-            warn!("PRICE_CACHE does NOT have BTC");
-            return false;
-        }
-        let btc_price = PRICE_CACHE.get_price("BTC").unwrap();
+        let btc_price = PRICE_CACHE
+            .get_price("BTC")
+            .expect("BTC should always exist in PRICE_CACHE");
 
         if self.count == 0 {
             self.timestamp_start = trade.timestamp;
@@ -236,8 +236,8 @@ impl Candlestick {
 
         let volume_delta = trade.quantity_base;
         let volume_quote_delta = trade.quantity_quote;
-        let volume_usd_delta = trade.quantity_base * quote_price;
-        let volume_btc_delta = trade.quantity_base * quote_price / btc_price;
+        let volume_usd_delta = volume_quote_delta * quote_price;
+        let volume_btc_delta = volume_quote_delta * quote_price / btc_price;
 
         self.volume += volume_delta;
         self.volume_quote += volume_quote_delta;
