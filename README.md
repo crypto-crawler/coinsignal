@@ -36,7 +36,7 @@ docker push soulmachine/coinsignal:frontend && docker push soulmachine/coinsigna
 
 ## Architecture
 
-![Architecture](./architecture.png)
+![Architecture](./architecture.svg)
 
 - I tried to use Kafka as the message queue, but it's too heavy, so I used Redis instead.
 
