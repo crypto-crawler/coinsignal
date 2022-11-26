@@ -1,6 +1,13 @@
-use std::{sync::mpsc::Receiver, thread::JoinHandle};
+use std::{
+    convert::TryInto,
+    sync::mpsc::Receiver,
+    thread::JoinHandle,
+    time::{SystemTime, UNIX_EPOCH},
+};
 
-use crypto_msg_parser::{FundingRateMsg, MarketType, MessageType, TradeMsg};
+use crypto_market_type::MarketType;
+use crypto_message::{FundingRateMsg, TradeMsg};
+use crypto_msg_type::MessageType;
 use log::*;
 use serde::{Deserialize, Serialize};
 use transform::constants::{REDIS_TOPIC_FUNDING_RATE_PARSED, REDIS_TOPIC_TRADE_PARSED};
@@ -54,10 +61,17 @@ fn create_parser_thread(
                         }
                     }
                     MessageType::FundingRate => {
+                        let received_at = SystemTime::now()
+                            .duration_since(UNIX_EPOCH)
+                            .unwrap()
+                            .as_millis()
+                            .try_into()
+                            .unwrap();
                         let rates = if let Ok(tmp) = crypto_msg_parser::parse_funding_rate(
                             &raw_msg.exchange,
                             raw_msg.market_type,
                             &raw_msg.json,
+                            Some(received_at),
                         ) {
                             tmp
                         } else {

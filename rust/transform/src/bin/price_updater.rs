@@ -1,4 +1,5 @@
-use crypto_msg_parser::{MarketType, TradeMsg};
+use crypto_market_type::MarketType;
+use crypto_message::TradeMsg;
 use log::*;
 use redis::Commands;
 use serde::{Deserialize, Serialize};

@@ -1,5 +1,5 @@
 use crypto_market_type::MarketType;
-use crypto_msg_parser::{TradeMsg, TradeSide};
+use crypto_message::{TradeMsg, TradeSide};
 use lazy_static::lazy_static;
 use log::*;
 use serde::{Deserialize, Serialize};

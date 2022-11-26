@@ -8,11 +8,6 @@ use std::{
     time::Duration,
 };
 
-const HOT_CURRENCIES: [&str; 14] = [
-    "BTC", "ETH", "BNB", "ADA", "XRP", "SOL", "DOT", "DOGE", "LUNA", "UNI", "LTC", "AVAX", "LINK",
-    "BCH",
-];
-
 pub struct PriceCache {
     redis_url: String,
     prices: Arc<Mutex<HashMap<String, f64>>>,
@@ -74,8 +69,12 @@ impl PriceCache {
     }
 
     fn is_ready(&self) -> bool {
-        for &currency in HOT_CURRENCIES.iter() {
-            if !self.prices.lock().unwrap().contains_key(currency) {
+        let hot_coins: [&str; 15] = [
+            "BTC", "ETH", "BNB", "XRP", "DOGE", "ADA", "MATIC", "LTC", "DOT", "SOL", "ATOM", "UNI",
+            "AVAX", "LINK", "BCH",
+        ];
+        for &coin in hot_coins.iter() {
+            if !self.prices.lock().unwrap().contains_key(coin) {
                 return false;
             }
         }

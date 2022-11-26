@@ -51,25 +51,54 @@ Make sure Redis and InfluxDB are running.
 `carbonbot-trade`:
 
 ```bash
-docker run -d --name carbonbot-trade --restart always -e REDIS_URL="redis://:7BUvEvH@192.168.5.250:6379" -u "$(id -u):$(id -g)" soulmachine/carbonbot pm2-runtime start pm2.trade.config.js
+docker run -d --name carbonbot-trade --restart always \
+  -v $LOCAL_TMP_DIR:/carbonbot_data \
+  -v $DEST_DIR:/dest_dir \
+  -e DEST_DIR=/dest_dir \
+  -e REDIS_URL="redis://172.17.0.1:6379" \
+  -u "$(id -u):$(id -g)" ghcr.io/crypto-crawler/carbonbot:latest pm2-runtime start pm2.trade.config.js
 ```
 
 `carbonbot-misc`:
 
 ```bash
-docker run -d --name carbonbot-misc --restart always -e REDIS_URL="redis://:password@ip:6379" -e FULL_NODE_URL="wss://mainnet.infura.io/ws/v3/YOUR_PROJECT_ID" -e ETHERSCAN_API_KEY="YOUR_API_KEY" -e CMC_API_KEY="YOUR_API_KEY" -u "$(id -u):$(id -g)" soulmachine/carbonbot:misc
+docker run -d --name carbonbot-misc --restart always \
+  -v $LOCAL_TMP_DIR:/carbonbot_data \
+  -v $DEST_DIR:/dest_dir \
+  -e DEST_DIR=/dest_dir \
+  -e REDIS_URL="redis://172.17.0.1:6379" \
+  -e FULL_NODE_URL="wss://mainnet.infura.io/ws/v3/YOUR_PROJECT_ID" \
+  -e ETHERSCAN_API_KEY=YOUR_API_KEY \
+  -e CMC_API_KEY=YOUR_API_KEY \
+  -u "$(id -u):$(id -g)" soulmachine/carbonbot:misc
 ```
 
 ### 3. Backend
 
 ```bash
-docker run -d --name coinsignal-backend --restart always -e INFLUXDB_URL=http://ip:8086 -e INFLUXDB_ORG=ORG_NAME -e INFLUXDB_BUCKET=BUCKET_NAME -e INFLUXDB_TOKEN=YOUR_TOKEN -e REDIS_URL="redis://:password@ip:6379" soulmachine/coinsignal:backend
+docker run -d --name coinsignal-backend --restart always \
+  -e INFLUXDB_URL=http://172.17.0.1:8086 \
+  -e INFLUXDB_ORG=crypto-crawler \
+  -e INFLUXDB_BUCKET=coinsignal \
+  -e INFLUXDB_TOKEN=YOUR_TOKEN \
+  -e REDIS_URL="redis://172.17.0.1:6379" \
+  ghcr.io/crypto-crawler/coinsignal:backend
 ```
 
 ### 4. Frontend
 
 ```bash
-docker run -d --name coinsignal-frontend --restart always -e INFLUXDB_URL=http://ip:8086 -e INFLUXDB_ORG=ORG_NAME -e INFLUXDB_BUCKET=BUCKET_NAME -e INFLUXDB_TOKEN=YOUR_TOKEN -e GF_SERVER_DOMAIN=coinsignal.org -e GF_AUTH_ANONYMOUS_ENABLED=true -e GF_AUTH_BASIC_ENABLED=false -e GF_AUTH_DISABLE_LOGIN_FORM=true -p 80:3000 soulmachine/coinsignal:frontend
+docker run -d --name coinsignal-frontend --restart always \
+  -e INFLUXDB_URL=http://172.17.0.1:8086 \
+  -e INFLUXDB_ORG=crypto-crawler \
+  -e INFLUXDB_BUCKET=coinsignal \
+  -e INFLUXDB_TOKEN=YOUR_TOKEN \
+  -e GF_SERVER_DOMAIN=coinsignal.org \
+  -e GF_AUTH_ANONYMOUS_ENABLED=true \
+  -e GF_AUTH_BASIC_ENABLED=false \
+  -e GF_AUTH_DISABLE_LOGIN_FORM=true \
+  -p 80:3000 \
+  ghcr.io/crypto-crawler/coinsignal:frontend
 ```
 
 The differences between dev and prod are:
@@ -78,3 +107,13 @@ The differences between dev and prod are:
 - `-p 3000:3000` vs. `-p 80:3000`
 
 You can run two frontend containers in parallel, one for development and one for production.
+
+## 5. Build Images
+
+```bash
+docker build -t ghcr.io/crypto-crawler/coinsignal:backend . -f Dockerfile.backend
+docker push ghcr.io/crypto-crawler/coinsignal:backend
+
+docker build -t ghcr.io/crypto-crawler/coinsignal:frontend . -f Dockerfile.frontend
+docker push ghcr.io/crypto-crawler/coinsignal:frontend
+```

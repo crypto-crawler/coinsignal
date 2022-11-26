@@ -4,21 +4,17 @@ services:
   redis:
     image: redis:latest
     command: redis-server --save "" --appendonly no
-    ports:
-      - 6379:6379
     restart: always
 
   influxdb:
     image: influxdb:latest
-    ports:
-      - 8086:8086
     environment:
       - DOCKER_INFLUXDB_INIT_MODE=setup
       - DOCKER_INFLUXDB_INIT_USERNAME=admin
       - DOCKER_INFLUXDB_INIT_PASSWORD=passw0rd
-      - DOCKER_INFLUXDB_INIT_ORG=soulmachine
-      - DOCKER_INFLUXDB_INIT_BUCKET=coinsignal
-      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=my-t0ken
+      - DOCKER_INFLUXDB_INIT_ORG=${INFLUXDB_ORG:-crypto-crawler}
+      - DOCKER_INFLUXDB_INIT_BUCKET=${INFLUXDB_BUCKET:-coinsignal}
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUXDB_TOKEN:-my-t0ken}
     volumes:
       - "influxdb2_data:/var/lib/influxdb2"
     restart: always
@@ -32,12 +28,12 @@ services:
       - 3000:3000
     environment:
       - INFLUXDB_URL=http://influxdb:8086
-      - INFLUXDB_TOKEN=my-t0ken
-      - INFLUXDB_ORG=soulmachine
-      - INFLUXDB_BUCKET=coinsignal
+      - INFLUXDB_TOKEN=${INFLUXDB_TOKEN:-my-t0ken}
+      - INFLUXDB_ORG=${INFLUXDB_ORG:-crypto-crawler}
+      - INFLUXDB_BUCKET=${INFLUXDB_BUCKET:-coinsignal}
       # for development
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=passw0rd
+      - GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD:-passw0rd}
       # for production
       # - GF_SERVER_DOMAIN=coinsignal.org
       # - GF_AUTH_ANONYMOUS_ENABLED=true
