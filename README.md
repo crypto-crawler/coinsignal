@@ -2,7 +2,7 @@
 
 Calculate all kinds of indicators to assist cryptocurrency trading.
 
-Website: <http://coinsignal.org>
+Website: <https://coinsignal.org>
 
 If you want to run this project locally, please read on.
 
