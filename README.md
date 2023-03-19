@@ -59,7 +59,7 @@ docker run -d --name carbonbot-trade --restart always \
   -u "$(id -u):$(id -g)" ghcr.io/crypto-crawler/carbonbot:latest pm2-runtime start pm2.trade.config.js
 ```
 
-`carbonbot-misc`:
+[`carbonbot-misc`](https://github.com/crypto-crawler/carbonbot-misc):
 
 ```bash
 docker run -d --name carbonbot-misc --restart always \
